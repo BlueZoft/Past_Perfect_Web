@@ -25,27 +25,13 @@ function App() {
 	const [range, setRange] = useState({ values: [0, 420] })
 	console.log(range)
 
-	// const [priceMin, setPriceMin] = useState(range.values[0])
-
-	// const [priceMin, setPriceMin] = useState("")
-	// setPriceMin(range.values[0])
-
-	// console.log(priceMin)
-	// const [priceMax, setPriceMax] = useState("")
-	// setPriceMax(range.values[1])
-
-	// console.log(priceMax)
-
 	const handleChangeSortPrice = (checkedValue) => {
 		if (checkedValue === true) {
 			setSortedPrice("price-asc")
 			setCheckedInput(true)
-			// return true
 		} else {
 			setSortedPrice("")
 			setCheckedInput(false)
-			// return false
-			// document.getElementsByclassName("check__check").removeAttribute("checked")
 		}
 	}
 
@@ -53,7 +39,6 @@ function App() {
 
 	const setUser = (token, id) => {
 		if (token) {
-			// Gestion de cookie
 			Cookies.set("userToken", token, { expires: 10 })
 			Cookies.set("userId", id, { expires: 10 })
 		} else {
@@ -75,11 +60,6 @@ function App() {
 				range={range}
 				setRange={setRange}
 				checkInputValue={checkInputValue}
-				// handlePageClick={handlePageClick}
-				// setPathName={setPathName}
-				// pathName={pathName}
-				// setPriceMin={setPriceMin}
-				// setPriceMax={setPriceMax}
 			/>
 			<Routes>
 				<Route
@@ -91,9 +71,6 @@ function App() {
 							setPage={setPage}
 							sortedPrice={sortedPrice}
 							range={range}
-							// handlePageClick={handlePageClick}
-							// priceMin={priceMin}
-							// priceMax={priceMax}
 						/>
 					}
 				/>

@@ -15,17 +15,36 @@ const SignUp = ({ setUser }) => {
 
   const navigate = useNavigate();
 
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 8; // Example: minimum length of 8 characters
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (!email || !username || !password) {
+      setErrorMessage("Email, Username, and Password fields are required!");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+
+    if (!validatePassword(password)) {
+      setErrorMessage("Password must be at least 8 characters long.");
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      if (!email || !username || !password) {
-        setErrorMessage("Email, Username, and Password fields are required!");
-        return;
-      }
-
-      setIsLoading(true);
-
       const formData = new FormData();
       formData.append("avatar", avatar);
       formData.append("username", username);
@@ -88,7 +107,10 @@ const SignUp = ({ setUser }) => {
           aria-label="Password"
         />
         <br />
+        <label htmlFor="avatar-upload">Upload a profile picture:</label>
+        <br />
         <input
+          id="avatar-upload"
           type="file"
           onChange={handleAvatarChange}
           aria-label="Avatar"

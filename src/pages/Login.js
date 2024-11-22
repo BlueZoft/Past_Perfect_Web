@@ -1,7 +1,6 @@
 import axios from "axios"
-import { Link } from "react-router-dom"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 
 const Login = ({ setUser }) => {
     const [email, setEmail] = useState("")
@@ -24,7 +23,6 @@ const Login = ({ setUser }) => {
             console.log(response.data)
             if (response.data.token) {
                 setUser(response.data.token, response.data._id)
-                // redirection
                 navigate("/")
             }
         } catch (error) {
