@@ -4,6 +4,21 @@ import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
+const validateTitle = (title) => {
+  const regex = /^[A-Za-z0-9\s.']{3,20}$/;
+  return regex.test(title);
+};
+
+const validateDescription = (description) => {
+  const regex = /^[A-Za-z0-9\s!.']{10,200}$/;
+  return regex.test(description);
+};
+
+const validatePrice = (price) => {
+  const numPrice = Number(price);
+  return Number.isInteger(numPrice) && numPrice >= 1 && numPrice <= 50000;
+};
+
 const Publish = ({ token }) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
@@ -16,22 +31,21 @@ const Publish = ({ token }) => {
   const [price, setPrice] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Add error states
+  const [titleError, setTitleError] = useState('');
+  const [descriptionError, setDescriptionError] = useState('');
+  const [priceError, setPriceError] = useState('');
+
   const sizeOptions = ["XS", "S", "M", "L", "XL", "XXL"];
   const conditionOptions = ["New with Tags", "Like New", "Fairly Used", "Used", "Worn"];
 
   const handlePictureChange = (event) => {
     const files = Array.from(event.target.files);
-    
-    // Check if adding new files would exceed limit
     if (files.length + pictures.length > 3) {
       setErrorMessage("Maximum 3 images allowed");
       return;
     }
-  
-    // Append new files to existing ones
     setPictures(prevPictures => [...prevPictures, ...files]);
-    
-    // Create and append new previews to existing ones
     const newPreviews = files.map((file) => URL.createObjectURL(file));
     setPreviews(prevPreviews => [...prevPreviews, ...newPreviews]);
   };
@@ -41,6 +55,36 @@ const Publish = ({ token }) => {
     setPictures(newPictures);
     const newPreviews = previews.filter((_, i) => i !== index);
     setPreviews(newPreviews);
+  };
+
+  const handleTitleChange = (event) => {
+    const newTitle = event.target.value;
+    setTitle(newTitle);
+    if (!validateTitle(newTitle)) {
+      setTitleError('Title must be 3-20 characters long, letters and numbers only');
+    } else {
+      setTitleError('');
+    }
+  };
+
+  const handleDescriptionChange = (event) => {
+    const newDescription = event.target.value;
+    setDescription(newDescription);
+    if (!validateDescription(newDescription)) {
+      setDescriptionError('Description must be 10-200 characters long');
+    } else {
+      setDescriptionError('');
+    }
+  };
+
+  const handlePriceChange = (event) => {
+    const newPrice = event.target.value;
+    setPrice(newPrice);
+    if (!validatePrice(newPrice)) {
+      setPriceError('Price must be a whole number');
+    } else {
+      setPriceError('');
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -169,16 +213,18 @@ const Publish = ({ token }) => {
             type="text"
             placeholder="title"
             value={title}
-            onChange={(event) => setTitle(event.target.value)}
+            onChange={handleTitleChange}
           />
+          {titleError && <div className="error-message">{titleError}</div>}
         </div>
         <div className="text-input">
           <h4>Description</h4>
           <textarea
             placeholder="description"
             value={description}
-            onChange={(event) => setDescription(event.target.value)}
+            onChange={handleDescriptionChange}
           />
+          {descriptionError && <div className="error-message">{descriptionError}</div>}
         </div>
         <div className="text-input">
           <h4>Size</h4>
@@ -208,8 +254,9 @@ const Publish = ({ token }) => {
             type="number"
             placeholder="price"
             value={price}
-            onChange={(event) => setPrice(event.target.value)}
+            onChange={handlePriceChange}
           />
+          {priceError && <div className="error-message">{priceError}</div>}
         </div>
       </div>
       <button type="submit" disabled={isLoading}>

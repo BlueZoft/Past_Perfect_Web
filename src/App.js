@@ -1,7 +1,8 @@
 import "./App.css"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import Cookies from "js-cookie"
+import { setupSessionTimeout } from "./utils/sessionTimeout"
 // Pages
 import Home from "./pages/Home"
 import Offer from "./pages/Offer"
@@ -20,6 +21,7 @@ function App() {
 	const [title, setSearch] = useState("")
 	const [sortedPrice, setSortedPrice] = useState("")
 	const [checkInputValue, setCheckedInput] = useState("")
+	const [searchQuery, setSearchQuery] = useState("")
 	console.log(sortedPrice)
 
 	const [range, setRange] = useState({ values: [0, 420] })
@@ -47,6 +49,30 @@ function App() {
 
 		setToken(token)
 	}
+
+	useEffect(() => {
+		if (token) {
+			const { resetTimeout, setupActivityListeners, cleanupActivityListeners } = setupSessionTimeout(setUser)
+
+			resetTimeout()
+			setupActivityListeners()
+
+			return () => cleanupActivityListeners()
+		}
+	}, [token])
+
+	useEffect(() => {
+		const handleBeforeUnload = () => {
+			Cookies.remove("userToken")
+		}
+
+		window.addEventListener("beforeunload", handleBeforeUnload)
+
+		return () => {
+			window.removeEventListener("beforeunload", handleBeforeUnload)
+		}
+	}, [])
+
 	return (
 		<Router>
 			<Header
@@ -60,6 +86,7 @@ function App() {
 				range={range}
 				setRange={setRange}
 				checkInputValue={checkInputValue}
+				setSearchQuery={setSearchQuery}
 			/>
 			<Routes>
 				<Route
@@ -71,6 +98,7 @@ function App() {
 							setPage={setPage}
 							sortedPrice={sortedPrice}
 							range={range}
+							searchQuery={searchQuery}
 						/>
 					}
 				/>

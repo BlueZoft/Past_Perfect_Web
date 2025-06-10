@@ -1,29 +1,33 @@
 import { useParams, Link } from "react-router-dom"
 import { useState, useEffect } from "react"
 import axios from "axios"
-//loader
 import { Puff } from "react-loader-spinner"
 
 const Offer = () => {
 	const { id } = useParams()
-	// console.log(id)
-
 	const [data, setData] = useState()
 	const [isLoading, setIsLoading] = useState(true)
+	const [error, setError] = useState()
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const response = await axios.get(
-				`http://localhost:3001/offer/${id}`
-			)
-			// console.log(response.data)
-			setData(response.data)
-			setIsLoading(false)
+			try {
+				const response = await axios.get(
+					`http://localhost:3001/offer/${id}`
+				)
+				console.log("Fetched data:", response.data)
+				setData(response.data)
+			} catch (err) {
+				setError(err.message)
+			} finally {
+				setIsLoading(false)
+			}
 		}
 		fetchData()
 	}, [id])
 
-	return isLoading ? (
+	if (error) return <div>Error: {error}</div>
+	if (isLoading) return (
 		<div>
 			<Puff
 				height="80"
@@ -36,58 +40,57 @@ const Offer = () => {
 				visible={true}
 			/>
 		</div>
-	) : (
+	)
+
+	return (
 		<div className="container">
 			<div className="offer-container">
 				<div className="offer-img">
-					<img style={{}} src={data.product_image.secure_url} alt="" />
+					{data?.images?.[0] && <img src={data.images[0]} alt="" />}
 				</div>
 				<div className="offer-content">
 					<div className="offer-content-first">
-						<div className="offer-price">{data.product_price} €</div>
+						<div className="offer-price"> LKR {data?.price}</div>
 						<div className="offer-details">
-							{data.product_details.map((item, index) => {
-								const keys = Object.keys(item) // ["MARQUE"]
-								return (
-									<div key={index}>
-										<ul className="offer-details-flex">
-											<li>
-												<span className="offer-details-key">{keys[0]}</span>
-												<span className="offer-details-value">
-													{item[keys[0]]}
-												</span>
-											</li>
-										</ul>
-									</div>
-								)
-							})}
+							{data?.size && (
+								<div>
+									<ul className="offer-details-flex">
+										<li>
+											<span className="offer-details-key">Size</span>
+											<span className="offer-details-value">{data.size}</span>
+										</li>
+									</ul>
+								</div>
+							)}
+							{data?.condition && (
+								<div>
+									<ul className="offer-details-flex">
+										<li>
+											<span className="offer-details-key">Condition</span>
+											<span className="offer-details-value">{data.condition}</span>
+										</li>
+									</ul>
+								</div>
+							)}
 						</div>
 					</div>
 					<div className="offer-content-second">
-						<div className="offer-name">{data.product_name}</div>
-						<div className="offer-desc">{data.product_description}</div>
+						<div className="offer-name">{data?.title}</div>
+						<div className="offer-desc">{data?.description}</div>
 						<div className="offer-username">
-							{data.owner.account.avatar && (
-								<img
-									style={{}}
-									src={data.owner.account.avatar.secure_url}
-									alt=""
-								/>
-							)}
-							<div className="offer-owner">{data.owner.account.username}</div>
+							{/* Avatar implementation would go here if needed */}
+							<div className="offer-owner">{data?.owner?.username}</div>
 						</div>
 					</div>
 					<Link
 						className="btn-offer"
 						to="/payment"
-						state={{ title: data.product_name, price: data.product_price }}
+						state={{ title: data?.title, price: data?.price }}
 					>
 						<button>Buy</button>
 					</Link>
 				</div>
 			</div>
-
-			{/* <h2>{data.product_name}</h2> */}
 		</div>
 	)
 }

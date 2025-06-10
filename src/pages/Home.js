@@ -2,39 +2,38 @@ import { Link } from "react-router-dom"
 import { useState, useEffect } from "react"
 import ReactPaginate from "react-paginate"
 import axios from "axios"
-
-//Hero
 import Hero from "../components/Hero"
-//Img
 import HeroImg from "../assets/hero.jpg"
 import decoHero from "../assets/deco.svg"
-//loader
 import { Puff } from "react-loader-spinner"
 
-const Home = ({ title, setPage, page, sortedPrice, range }) => {
+const Home = ({ title, setPage, page, sortedPrice, range, searchQuery }) => {
 	const [data, setData] = useState()
 	const [isLoading, setIsLoading] = useState(true)
-
 	const [pageCount, setPageCount] = useState(1)
 	const limit = 10
 
 	const handlePageClick = (event) => {
-		console.log(event.selected)
 		setPage(event.selected + 1)
 	}
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const response = await axios.get(
-				`http://localhost:3001/offers?limit=${limit}&page=${page}&title=${title}&sort=${sortedPrice}&priceMin=${range.values[0]}&priceMax=${range.values[1]}`
-			)
-			console.log(response.data)
-			setPageCount(Math.ceil(Number(response.data.count) / limit))
-			setData(response.data)
-			setIsLoading(false)
+			try {
+				const response = await axios.get(`http://localhost:3001/offers`);
+				setPageCount(Math.ceil(Number(response.data.count) / limit));
+				const offersWithFirstImage = response.data.offers.map(offer => ({
+					...offer,
+					displayImage: offer.product_images.length > 0 ? offer.product_images[0].url : null // Check if product_images is not empty
+				}));
+				setData({ ...response.data, offers: offersWithFirstImage });
+				setIsLoading(false);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			}
 		}
 		fetchData()
-	}, [page, title, sortedPrice, range])
+	}, [page])
 
 	return isLoading ? (
 		<div>
@@ -81,21 +80,17 @@ const Home = ({ title, setPage, page, sortedPrice, range }) => {
 									<span className="offers-img-container">
 										<img
 											style={{ height: 400 }}
-											src={offer.product_image.secure_url}
-											alt=""
+											src={offer.displayImage}
+											alt={offer.product_name}
 										/>
 									</span>
 									<div className="card">
-										{/* <h2 style={{ marginBottom: 15 }}>{offer.product_name}</h2> */}
 										<h3 className="offers-name">{offer.product_name}</h3>
-										<h2 className="offers-price">{offer.product_price} € </h2>
-
+										<h2 className="offers-price">LKR {offer.product_price}</h2>
 										{offer.product_details.map((item, index) => {
-											// const keys = Object.keys(item) // ["MARQUE"]
 											return (
 												<div key={index}>
-													<span className="offers-marque">{item.MARQUE}</span>
-													<span className="offers-taille">{item.TAILLE}</span>
+													<span className="offers-title">{item.title}</span>
 												</div>
 											)
 										})}
@@ -120,27 +115,6 @@ const Home = ({ title, setPage, page, sortedPrice, range }) => {
 						forcePage={page - 1} // return to the previous page if click on previous
 					/>
 				</div>
-
-				{/* <div className="navPage">
-
-					{data.offers.length === 0 ||
-					data.offers.length * page === data.count ? (
-						<div></div>
-					) : page >= 2 && data.offers.length === limit ? (
-						<div>
-							<button onClick={() => setPage(page - 1)}>Page précédente</button>
-							<button onClick={() => setPage(page + 1)}>Page suivante</button>
-						</div>
-					) : page === 1 ? (
-						<div>
-							<button onClick={() => setPage(page + 1)}>Page suivante</button>
-						</div>
-					) : (
-						<div>
-							<button onClick={() => setPage(page - 1)}>Page précédente</button>
-						</div>
-					)}
-				</div> */}
 			</div>
 		</>
 	)

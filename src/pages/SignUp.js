@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { setupSessionTimeout } from "../utils/sessionTimeout";
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -63,6 +64,8 @@ const SignUp = ({ setUser }) => {
 
       if (response.data.token) {
         setUser(response.data.token, response.data._id);
+        const { resetTimeout } = setupSessionTimeout(setUser);
+        resetTimeout();
         navigate("/");
       } else {
         setErrorMessage("Sign up failed");

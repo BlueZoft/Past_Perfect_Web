@@ -886,3 +886,8 @@ input {
 	/* font-weight: bold; */
 	text-align: center;
 }
+.error-message {
+	color: red;
+	font-size: 12px;
+	margin-top: 4px;
+  }

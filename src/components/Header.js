@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faSearch } from "@fortawesome/free-solid-svg-icons"
 
+
 const Header = ({
 	logo,
 	token,
@@ -11,6 +12,7 @@ const Header = ({
 	title,
 	setSearch,
 	setPage,
+	setSearchQuery,
 }) => {
 
 	const navigate = useNavigate()
@@ -19,13 +21,21 @@ const Header = ({
 	console.log(pathName)
 
 	useEffect(() => {
-		// detect if we're on the homepage, if yes, display search bar + range select
 		if (location.pathname === "/") {
 			setPathName(true)
 		} else {
 			setPathName(false)
 		}
 	}, [location])
+
+	const handleSearch = (event) => {
+		setSearch(event.target.value)
+		setSearchQuery(event.target.value)
+		setPage(1)
+		if (location.pathname !== '/') {
+			navigate('/')
+		}
+	}
 
 	return (
 		<div className="header-container">
@@ -48,10 +58,7 @@ const Header = ({
 									className="searchInput"
 									type="text"
 									value={title}
-									onChange={(event) => {
-										setSearch(event.target.value)
-										setPage(1)
-									}}
+									onChange={handleSearch}
 								/>
 							</div>
 						</div>

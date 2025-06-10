@@ -1,6 +1,7 @@
 import axios from "axios"
 import { useState } from "react"
 import { useNavigate, Link } from "react-router-dom"
+import { setupSessionTimeout } from "../utils/sessionTimeout"
 
 const Login = ({ setUser }) => {
     const [email, setEmail] = useState("")
@@ -23,6 +24,8 @@ const Login = ({ setUser }) => {
             console.log(response.data)
             if (response.data.token) {
                 setUser(response.data.token, response.data._id)
+                const { resetTimeout } = setupSessionTimeout(setUser);
+                resetTimeout();
                 navigate("/")
             }
         } catch (error) {
