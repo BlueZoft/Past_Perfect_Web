@@ -1,8 +1,10 @@
+import { t, errorText, useI18n, localeTag } from "../i18n";
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api, errorMessage, imageUrl } from "../api";
 import CatalogueFields from "../components/CatalogueFields";
 export default function Home() {
+  useI18n();
   const [params, setParams] = useSearchParams();
   const query = params.toString();
   const [data, setData] = useState(null),
@@ -41,8 +43,8 @@ export default function Home() {
   };
   return (
     <main className="container">
-      <h1>Find your next pre-loved item</h1>
-      <section aria-label="Search filters" className="filters">
+      <h1>{t("Find your next pre-loved item")}</h1>
+      <section aria-label={t("Search filters")} className="filters">
         <CatalogueFields
           filters
           value={{
@@ -60,7 +62,8 @@ export default function Home() {
           }}
         />
         <label>
-          Search
+          {" "}
+          {t("Search")}{" "}
           <input
             value={params.get("title") || ""}
             maxLength={120}
@@ -68,7 +71,8 @@ export default function Home() {
           />
         </label>
         <label>
-          Minimum LKR
+          {" "}
+          {t("Minimum LKR")}{" "}
           <input
             type="number"
             min="0"
@@ -77,7 +81,8 @@ export default function Home() {
           />
         </label>
         <label>
-          Maximum LKR
+          {" "}
+          {t("Maximum LKR")}{" "}
           <input
             type="number"
             min="0"
@@ -86,27 +91,28 @@ export default function Home() {
           />
         </label>
         <label>
-          Sort
+          {" "}
+          {t("Sort")}{" "}
           <select
             value={params.get("sort") || "newest"}
             onChange={(e) => change("sort", e.target.value)}
           >
-            <option value="newest">Newest</option>
-            <option value="price-asc">Price: low to high</option>
-            <option value="price-desc">Price: high to low</option>
+            <option value="newest">{t("Newest")}</option>
+            <option value="price-asc">{t("Price: low to high")}</option>
+            <option value="price-desc">{t("Price: high to low")}</option>
           </select>
         </label>
       </section>
       {busy ? (
-        <p role="status">Loading listings…</p>
+        <p role="status">{t("Loading listings\u2026")}</p>
       ) : error ? (
         <div role="alert">
-          {error}
-          <button onClick={() => setRetry(retry + 1)}>Retry</button>
+          {errorText(error)}
+          <button onClick={() => setRetry(retry + 1)}>{t("Retry")}</button>
         </div>
       ) : (
         <>
-          {!data?.offers.length && <p>No listings match your search.</p>}
+          {!data?.offers.length && <p>{t("No listings match your search.")}</p>}
           <div className="offers">
             {data?.offers.map((item) => (
               <Link
@@ -117,18 +123,26 @@ export default function Home() {
                 {item.images?.[0] && (
                   <img
                     loading="lazy"
-                    style={{ width: "100%", height: 240, objectFit: "cover" }}
+                    style={{
+                      width: "100%",
+                      height: 240,
+                      objectFit: "cover",
+                    }}
                     src={imageUrl(item.images[0].url)}
                     alt={item.title}
                   />
                 )}
                 <h2>{item.title}</h2>
-                <p>LKR {item.price.toLocaleString("en-LK")}</p>
-                <p>{item.owner?.account?.username || "Seller unavailable"}</p>
+                <p>
+                  {t("LKR")} {item.price.toLocaleString(localeTag())}
+                </p>
+                <p>
+                  {item.owner?.account?.username || t("Seller unavailable")}
+                </p>
               </Link>
             ))}
           </div>
-          <nav aria-label="Pagination">
+          <nav aria-label={t("Pagination")}>
             <button
               disabled={data.page <= 1}
               onClick={() => {
@@ -137,11 +151,12 @@ export default function Home() {
                 setParams(next);
               }}
             >
-              Previous
+              {" "}
+              {t("Previous")}{" "}
             </button>
             <span>
               {" "}
-              Page {data.page} of{" "}
+              {t("Page")} {data.page} {t("of")}{" "}
               {Math.max(1, Math.ceil(data.count / data.limit))}{" "}
             </span>
             <button
@@ -152,7 +167,8 @@ export default function Home() {
                 setParams(next);
               }}
             >
-              Next
+              {" "}
+              {t("Next")}{" "}
             </button>
           </nav>
         </>

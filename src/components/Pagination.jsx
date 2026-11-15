@@ -1,3 +1,4 @@
+import { t, errorText, useI18n } from "../i18n";
 export default function Pagination({
   page,
   count,
@@ -5,23 +6,27 @@ export default function Pagination({
   onChange,
   disabled = false,
 }) {
+  useI18n();
   return (
-    <nav aria-label="Pagination">
+    <nav aria-label={t("Pagination")}>
       <button
         disabled={disabled || page <= 1}
         onClick={() => onChange(page - 1)}
       >
-        Previous
+        {" "}
+        {t("Previous")}{" "}
       </button>
       <span>
         {" "}
-        Page {page} of {Math.max(1, Math.ceil(count / limit))}{" "}
+        {t("Page")} {page} {t("of")}{" "}
+        {Math.max(1, Math.ceil(count / limit))}{" "}
       </span>
       <button
         disabled={disabled || page * limit >= count}
         onClick={() => onChange(page + 1)}
       >
-        Next
+        {" "}
+        {t("Next")}{" "}
       </button>
     </nav>
   );

@@ -1,5 +1,5 @@
+import { t, errorText, useI18n } from "../i18n";
 const NotFound = () => {
-  return <div>404 Not Found</div>;
+  return <div>{t("404 Not Found")}</div>;
 };
-
 export default NotFound;

@@ -1,3 +1,4 @@
+import { t, errorText, useI18n, localeTag } from "../i18n";
 import { useEffect, useState } from "react";
 import { Navigate, Link, useParams, useSearchParams } from "react-router-dom";
 import { api, errorMessage } from "../api";
@@ -5,6 +6,7 @@ import Pagination from "../components/Pagination";
 import BlockControl from "../components/BlockControl";
 import ReportControl from "../components/ReportControl";
 export default function Enquiry({ user }) {
+  useI18n();
   const { id } = useParams();
   const [params, setParams] = useSearchParams();
   const page = params.get("page") || "1";
@@ -19,7 +21,11 @@ export default function Enquiry({ user }) {
     setData(null);
     setError("");
     api
-      .get("/enquiry/" + id + "/messages", { params: { page } })
+      .get("/enquiry/" + id + "/messages", {
+        params: {
+          page,
+        },
+      })
       .then((r) => {
         if (active) setData(r.data);
       })
@@ -35,9 +41,13 @@ export default function Enquiry({ user }) {
     setBusy(true);
     setError("");
     try {
-      await api.post("/enquiry/" + id + "/messages", { message });
+      await api.post("/enquiry/" + id + "/messages", {
+        message,
+      });
       setMessage("");
-      setParams({ page: String(Math.ceil((data.count + 1) / data.limit)) });
+      setParams({
+        page: String(Math.ceil((data.count + 1) / data.limit)),
+      });
       setRetry((value) => value + 1);
     } catch (err) {
       setError(errorMessage(err));
@@ -48,17 +58,20 @@ export default function Enquiry({ user }) {
   if (!user) return <Navigate to="/login" replace />;
   return (
     <main className="container">
-      <Link to="/enquiries">All enquiries</Link>
-      <h1>{data?.enquiry.title || "Enquiry"}</h1>
+      <Link to="/enquiries">{t("All enquiries")}</Link>
+      <h1>{data?.enquiry.title || t("Enquiry")}</h1>
       <p>
-        Keep sensitive personal and payment information out of messages.
-        Messages update when you refresh.
+        {" "}
+        {t(
+          "Keep sensitive personal and payment information out of messages. Messages update when you refresh.",
+        )}{" "}
       </p>
       <button disabled={busy} onClick={() => setRetry(retry + 1)}>
-        Refresh messages
+        {" "}
+        {t("Refresh messages")}{" "}
       </button>
-      {error && <p role="alert">{error}</p>}
-      {!data && !error && <p role="status">Loading messages…</p>}
+      {error && <p role="alert">{errorText(error)}</p>}
+      {!data && !error && <p role="status">{t("Loading messages\u2026")}</p>}
       {data && (
         <>
           {data.enquiry.buyer && data.enquiry.seller && (
@@ -70,17 +83,24 @@ export default function Enquiry({ user }) {
               }
             />
           )}
-          <ol aria-label="Messages">
+          <ol aria-label={t("Messages")}>
             {data.messages.map((item) => (
               <li key={item._id}>
                 <strong>
                   {item.sender === user._id
-                    ? "You"
+                    ? t("You")
                     : data.enquiry.buyer?._id === item.sender
                       ? data.enquiry.buyer.account.username
-                      : data.enquiry.seller?.account.username || "Participant"}
+                      : data.enquiry.seller?.account.username ||
+                        t("Participant")}
                 </strong>
-                <p style={{ whiteSpace: "pre-wrap" }}>{item.text}</p>
+                <p
+                  style={{
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {item.text}
+                </p>
                 {item.sender !== user._id && (
                   <ReportControl
                     targetType="message"
@@ -89,7 +109,7 @@ export default function Enquiry({ user }) {
                   />
                 )}
                 <time dateTime={item.createdAt}>
-                  {new Date(item.createdAt).toLocaleString()}
+                  {new Date(item.createdAt).toLocaleString(localeTag())}
                 </time>
               </li>
             ))}
@@ -97,11 +117,16 @@ export default function Enquiry({ user }) {
           <Pagination
             {...data}
             disabled={busy}
-            onChange={(value) => setParams({ page: String(value) })}
+            onChange={(value) =>
+              setParams({
+                page: String(value),
+              })
+            }
           />
           <form onSubmit={send}>
             <label>
-              Reply
+              {" "}
+              {t("Reply")}{" "}
               <textarea
                 required
                 maxLength={2000}
@@ -109,7 +134,9 @@ export default function Enquiry({ user }) {
                 onChange={(e) => setMessage(e.target.value)}
               />
             </label>
-            <button disabled={busy || !message.trim()}>Send reply</button>
+            <button disabled={busy || !message.trim()}>
+              {t("Send reply")}
+            </button>
           </form>
         </>
       )}

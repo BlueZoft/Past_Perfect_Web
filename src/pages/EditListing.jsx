@@ -1,3 +1,4 @@
+import { t, errorText, useI18n } from "../i18n";
 import { useEffect, useState } from "react";
 import { Navigate, Link, useParams, useNavigate } from "react-router-dom";
 import { api, errorMessage } from "../api";
@@ -5,6 +6,7 @@ import ListingFields from "../components/ListingFields";
 import { listingError } from "../lib/listing";
 import ReplaceImages from "../components/ReplaceImages";
 export default function EditListing({ user }) {
+  useI18n();
   const { id } = useParams(),
     navigate = useNavigate();
   const [listing, setListing] = useState(null),
@@ -77,27 +79,30 @@ export default function EditListing({ user }) {
   if (!user) return <Navigate to="/login" replace />;
   return (
     <main className="container">
-      <h1>Edit listing</h1>
+      <h1>{t("Edit listing")}</h1>
       {error && (
         <div role="alert">
-          {error}{" "}
+          {errorText(error)}{" "}
           <button disabled={busy} onClick={() => setRetry(retry + 1)}>
-            Reload listing
+            {" "}
+            {t("Reload listing")}{" "}
           </button>
         </div>
       )}
-      {!value && !error && <p role="status">Loading listing…</p>}
+      {!value && !error && <p role="status">{t("Loading listing\u2026")}</p>}
       {value && (
         <form onSubmit={submit}>
           <ListingFields value={value} onChange={setValue} disabled={busy} />
 
-          <button disabled={busy}>{busy ? "Saving…" : "Save changes"}</button>
+          <button disabled={busy}>
+            {busy ? t("Saving\u2026") : t("Save changes")}
+          </button>
         </form>
       )}
       {listing && value && (
         <ReplaceImages listing={listing} onSaved={setListing} disabled={busy} />
       )}
-      <Link to="/my-listings">Back to my listings</Link>
+      <Link to="/my-listings">{t("Back to my listings")}</Link>
     </main>
   );
 }

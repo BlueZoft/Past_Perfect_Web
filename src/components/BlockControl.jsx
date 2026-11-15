@@ -1,6 +1,8 @@
+import { t, errorText, useI18n } from "../i18n";
 import { useEffect, useState } from "react";
 import { api, errorMessage } from "../api";
 export default function BlockControl({ target }) {
+  useI18n();
   const [blocked, setBlocked] = useState(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
@@ -37,17 +39,20 @@ export default function BlockControl({ target }) {
   return (
     <section>
       <p>
-        Blocking stops new messages in both directions. Existing conversation
-        history remains available.
+        {" "}
+        {t(
+          "Blocking stops new messages in both directions. Existing conversation history remains available.",
+        )}{" "}
       </p>
       <button disabled={busy || blocked === null} onClick={toggle}>
-        {blocked ? "Unblock user" : "Block user"}
+        {blocked ? t("Unblock user") : t("Block user")}
       </button>
       {error && (
         <div role="alert">
-          {error}
+          {errorText(error)}
           <button onClick={() => setRetry(retry + 1)}>
-            Retry block status
+            {" "}
+            {t("Retry block status")}{" "}
           </button>
         </div>
       )}

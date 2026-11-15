@@ -1,3 +1,4 @@
+import { t, errorText, useI18n } from "../i18n";
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { api, errorMessage } from "../api";
@@ -7,6 +8,7 @@ import BlockControl from "../components/BlockControl";
 import ReportControl from "../components/ReportControl";
 import { imageUrl } from "../api";
 export default function Seller({ user }) {
+  useI18n();
   const { id } = useParams();
   const [params, setParams] = useSearchParams();
   const page = params.get("page") || "1";
@@ -18,7 +20,11 @@ export default function Seller({ user }) {
     setData(null);
     setError("");
     api
-      .get("/seller/" + id, { params: { page } })
+      .get("/seller/" + id, {
+        params: {
+          page,
+        },
+      })
       .then((r) => {
         if (active) setData(r.data);
       })
@@ -32,20 +38,23 @@ export default function Seller({ user }) {
   if (error)
     return (
       <div role="alert">
-        {error}
-        <button onClick={() => setRetry(retry + 1)}>Retry</button>
+        {errorText(error)}
+        <button onClick={() => setRetry(retry + 1)}>{t("Retry")}</button>
       </div>
     );
-  if (!data) return <p role="status">Loading seller…</p>;
+  if (!data) return <p role="status">{t("Loading seller\u2026")}</p>;
   return (
     <main className="container">
       <h1>{data.seller.account.username}</h1>
-      <p>{data.seller.account.bio || "This seller has not added a bio."}</p>
+      <p>{data.seller.account.bio || t("This seller has not added a bio.")}</p>
       {data.seller.account.avatar?.url && (
         <img
           src={imageUrl(data.seller.account.avatar.url)}
-          alt="Seller avatar"
-          style={{ maxWidth: 120, maxHeight: 120 }}
+          alt={t("Seller avatar")}
+          style={{
+            maxWidth: 120,
+            maxHeight: 120,
+          }}
         />
       )}
       {user && user._id !== id && (
@@ -54,12 +63,17 @@ export default function Seller({ user }) {
           <ReportControl targetType="user" target={id} label="Report seller" />
         </>
       )}
-      <h2>Active listings</h2>
-      {!data.offers.length && <p>No active listings.</p>}
+      {data.seller.emailVerified && <p>{t("Email verified")}</p>}
+      <h2>{t("Active listings")}</h2>
+      {!data.offers.length && <p>{t("No active listings.")}</p>}
       <OfferCards offers={data.offers} />
       <Pagination
         {...data}
-        onChange={(value) => setParams({ page: String(value) })}
+        onChange={(value) =>
+          setParams({
+            page: String(value),
+          })
+        }
       />
     </main>
   );

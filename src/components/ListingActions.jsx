@@ -1,8 +1,10 @@
+import { t, errorText, useI18n } from "../i18n";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, errorMessage } from "../api";
 import ReportControl from "./ReportControl";
 export default function ListingActions({ listing, user }) {
+  useI18n();
   const navigate = useNavigate();
   const [saved, setSaved] = useState(null),
     [message, setMessage] = useState(""),
@@ -57,11 +59,13 @@ export default function ListingActions({ listing, user }) {
   if (!user)
     return (
       <p>
-        <Link to="/login">Log in to save this item or contact the seller</Link>
+        <Link to="/login">
+          {t("Log in to save this item or contact the seller")}
+        </Link>
       </p>
     );
   return (
-    <section aria-label="Listing actions">
+    <section aria-label={t("Listing actions")}>
       {listing.owner?._id !== user._id && (
         <ReportControl
           targetType="listing"
@@ -70,12 +74,13 @@ export default function ListingActions({ listing, user }) {
         />
       )}
       <button disabled={busy || saved === null} onClick={favourite}>
-        {saved ? "Remove favourite" : "Save to favourites"}
+        {saved ? t("Remove favourite") : t("Save to favourites")}
       </button>
       {listing.status === "active" && listing.owner?._id !== user._id && (
         <form onSubmit={enquire}>
           <label>
-            Ask the seller
+            {" "}
+            {t("Ask the seller")}{" "}
             <textarea
               required
               maxLength={2000}
@@ -83,14 +88,16 @@ export default function ListingActions({ listing, user }) {
               onChange={(e) => setMessage(e.target.value)}
             />
           </label>
-          <button disabled={busy || !message.trim()}>Send enquiry</button>
+          <button disabled={busy || !message.trim()}>
+            {t("Send enquiry")}
+          </button>
         </form>
       )}
       {error && (
         <div role="alert">
-          {error}
+          {errorText(error)}
           {saved === null && (
-            <button onClick={() => setRetry(retry + 1)}>Retry</button>
+            <button onClick={() => setRetry(retry + 1)}>{t("Retry")}</button>
           )}
         </div>
       )}

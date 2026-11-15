@@ -1,6 +1,8 @@
+import { t, errorText, useI18n } from "../i18n";
 import { useState, useEffect } from "react";
 import { api, errorMessage, imageUrl } from "../api";
 export default function ReplaceImages({ listing, onSaved, disabled = false }) {
+  useI18n();
   const [files, setFiles] = useState([]),
     [previews, setPreviews] = useState([]),
     [error, setError] = useState(""),
@@ -44,25 +46,31 @@ export default function ReplaceImages({ listing, onSaved, disabled = false }) {
   }
   return (
     <section>
-      <h2>Listing photos</h2>
+      <h2>{t("Listing photos")}</h2>
       <div>
         {listing.images?.map((image) => (
           <img
             key={image.publicId || image.url}
             src={imageUrl(image.url)}
-            alt="Current listing photo"
-            style={{ maxWidth: 150, maxHeight: 150 }}
+            alt={t("Current listing photo")}
+            style={{
+              maxWidth: 150,
+              maxHeight: 150,
+            }}
           />
         ))}
       </div>
       <p>
-        Choose all replacement photos in the order you want them displayed. This
-        replaces the entire current set.
+        {" "}
+        {t(
+          "Choose all replacement photos in the order you want them displayed. This replaces the entire current set.",
+        )}{" "}
       </p>
       <form onSubmit={submit}>
         <fieldset disabled={busy || disabled}>
           <label>
-            Replacement photos
+            {" "}
+            {t("Replacement photos")}{" "}
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
@@ -78,18 +86,21 @@ export default function ReplaceImages({ listing, onSaved, disabled = false }) {
               <img
                 key={url}
                 src={url}
-                alt="Replacement preview"
-                style={{ maxWidth: 150, maxHeight: 150 }}
+                alt={t("Replacement preview")}
+                style={{
+                  maxWidth: 150,
+                  maxHeight: 150,
+                }}
               />
             ))}
           </div>
           <button disabled={!files.length}>
-            {busy ? "Replacing…" : "Replace all photos"}
+            {busy ? t("Replacing\u2026") : t("Replace all photos")}
           </button>
         </fieldset>
       </form>
-      {error && <p role="alert">{error}</p>}
-      {saved && <p role="status">Photos replaced.</p>}
+      {error && <p role="alert">{errorText(error)}</p>}
+      {saved && <p role="status">{t("Photos replaced.")}</p>}
     </section>
   );
 }

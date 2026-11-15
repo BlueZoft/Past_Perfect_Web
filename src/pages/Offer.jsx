@@ -1,8 +1,10 @@
+import { t, errorText, useI18n, localeTag } from "../i18n";
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api, errorMessage, imageUrl } from "../api";
 import ListingActions from "../components/ListingActions";
 export default function Offer({ user }) {
+  useI18n();
   const { id } = useParams();
   const [data, setData] = useState(null),
     [error, setError] = useState("");
@@ -22,8 +24,8 @@ export default function Offer({ user }) {
       active = false;
     };
   }, [id]);
-  if (error) return <p role="alert">{error}</p>;
-  if (!data) return <p role="status">Loading listing…</p>;
+  if (error) return <p role="alert">{errorText(error)}</p>;
+  if (!data) return <p role="status">{t("Loading listing\u2026")}</p>;
   return (
     <main className="container">
       <h1>{data.title}</h1>
@@ -32,32 +34,53 @@ export default function Offer({ user }) {
           {data.images.map((image, i) => (
             <img
               key={image.publicId || i}
-              style={{ maxWidth: "100%", maxHeight: 400 }}
+              style={{
+                maxWidth: "100%",
+                maxHeight: 400,
+              }}
               src={imageUrl(image.url)}
-              alt={`${data.title} — photo ${i + 1}`}
+              alt={t("Photo {0} of {title}", {
+                0: i + 1,
+                title: data.title,
+              })}
             />
           ))}
         </div>
         <section>
-          <h2>LKR {data.price.toLocaleString("en-LK")}</h2>
+          <h2>
+            {t("LKR")} {data.price.toLocaleString(localeTag())}
+          </h2>
           <p>{data.description}</p>
-          <p>Condition: {data.condition}</p>
-          {data.size && <p>Size: {data.size}</p>}
           <p>
-            Seller:{" "}
+            {t("Condition:")} {t(data.condition)}
+          </p>
+          {data.size && (
+            <p>
+              {t("Size:")} {data.size}
+            </p>
+          )}
+          <p>
+            {" "}
+            {t("Seller:")}{" "}
             {data.owner ? (
               <Link to={"/seller/" + data.owner._id}>
-                {data.owner.account?.username || "Unavailable"}
+                {data.owner.account?.username || t("Unavailable")}
               </Link>
             ) : (
-              "Unavailable"
+              t("Unavailable")
             )}
           </p>
-          <p>Category: {data.category || "other"}</p>
-          <p>Location: {data.town || data.district || "Not specified"}</p>
-          <p>Status: {data.status}</p>
+          <p>
+            {t("Category:")} {t(data.category || "other")}
+          </p>
+          <p>
+            {t("Location:")} {data.town || data.district || t("Not specified")}
+          </p>
+          <p>
+            {t("Status:")} {t(data.status)}
+          </p>
           <ListingActions listing={data} user={user} />
-          <p>Online checkout is not available yet.</p>
+          <p>{t("Online checkout is not available yet.")}</p>
         </section>
       </div>
     </main>

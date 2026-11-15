@@ -132,6 +132,7 @@ test("signup collects username and sends JSON through the shared client", async 
     username: "Tester",
     email: "test@example.invalid",
     password: "test-password",
+    locale: "en",
   });
 });
 

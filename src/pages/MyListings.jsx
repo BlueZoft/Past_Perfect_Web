@@ -1,7 +1,9 @@
+import { t, errorText, useI18n, localeTag } from "../i18n";
 import { useEffect, useState } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { api, errorMessage } from "../api";
 export default function MyListings({ user }) {
+  useI18n();
   const [params, setParams] = useSearchParams();
   const query = params.toString();
   const [data, setData] = useState(null),
@@ -17,7 +19,9 @@ export default function MyListings({ user }) {
     setError("");
     setRemove(null);
     api
-      .get("/user/offers", { params: new URLSearchParams(query) })
+      .get("/user/offers", {
+        params: new URLSearchParams(query),
+      })
       .then(({ data }) => {
         if (active) setData(data);
       })
@@ -36,7 +40,11 @@ export default function MyListings({ user }) {
     setError("");
     try {
       if (status === "removed")
-        await api.delete("/offer/" + item._id, { data: { version: item.__v } });
+        await api.delete("/offer/" + item._id, {
+          data: {
+            version: item.__v,
+          },
+        });
       else
         await api.patch("/offer/" + item._id + "/status", {
           status,
@@ -57,10 +65,11 @@ export default function MyListings({ user }) {
   if (!user) return <Navigate to="/login" replace />;
   return (
     <main className="container">
-      <h1>My listings</h1>
-      <Link to="/publish">Create a listing</Link>
+      <h1>{t("My listings")}</h1>
+      <Link to="/publish">{t("Create a listing")}</Link>
       <label>
-        Status
+        {" "}
+        {t("Status")}{" "}
         <select
           disabled={busy}
           value={params.get("status") || ""}
@@ -70,42 +79,46 @@ export default function MyListings({ user }) {
             setParams(next);
           }}
         >
-          <option value="">All current listings</option>
-          <option value="active">Active</option>
-          <option value="reserved">Reserved</option>
-          <option value="sold">Sold</option>
+          <option value="">{t("All current listings")}</option>
+          <option value="active">{t("Active")}</option>
+          <option value="reserved">{t("Reserved")}</option>
+          <option value="sold">{t("Sold")}</option>
         </select>
       </label>
       {error && (
         <div role="alert">
-          {error}{" "}
+          {errorText(error)}{" "}
           <button
             disabled={busy}
             onClick={() => setRetry((value) => value + 1)}
           >
-            Reload listings
+            {" "}
+            {t("Reload listings")}{" "}
           </button>
         </div>
       )}
       {loading ? (
-        <p role="status">Loading your listings…</p>
+        <p role="status">{t("Loading your listings\u2026")}</p>
       ) : (
         data && (
           <>
-            {!data.offers.length && <p>No listings in this view.</p>}
+            {!data.offers.length && <p>{t("No listings in this view.")}</p>}
             {data.offers.map((item) => (
               <article className="seller-listing" key={item._id}>
                 <h2>
                   <Link to={"/offer/" + item._id}>{item.title}</Link>
                 </h2>
                 <p>
-                  LKR {item.price.toLocaleString("en-LK")} · {item.status}
+                  {" "}
+                  {t("LKR")} {item.price.toLocaleString(localeTag())} ·{" "}
+                  {t(item.status)}
                 </p>
                 {!item.moderationHidden &&
                   ["active", "reserved"].includes(item.status) && (
                     <>
                       <Link to={"/my-listings/" + item._id + "/edit"}>
-                        Edit listing
+                        {" "}
+                        {t("Edit listing")}{" "}
                       </Link>{" "}
                       <button
                         disabled={busy}
@@ -117,47 +130,55 @@ export default function MyListings({ user }) {
                         }
                       >
                         {item.status === "active"
-                          ? "Reserve"
-                          : "Make available"}
+                          ? t("Reserve")
+                          : t("Make available")}
                       </button>{" "}
                       <button
                         disabled={busy}
                         onClick={() => change(item, "sold")}
                       >
-                        Mark sold
+                        {" "}
+                        {t("Mark sold")}{" "}
                       </button>{" "}
                     </>
                   )}
                 {item.moderationHidden && (
                   <p>
-                    Hidden by moderation. You can remove this listing, but
-                    cannot edit or reactivate it.
+                    {" "}
+                    {t(
+                      "Hidden by moderation. You can remove this listing, but cannot edit or reactivate it.",
+                    )}{" "}
                   </p>
                 )}
                 {remove === item._id ? (
                   <div>
                     <p>
-                      Remove this listing? It will disappear from public
-                      listings and cannot be restored here.
+                      {" "}
+                      {t(
+                        "Remove this listing? It will disappear from public listings and cannot be restored here.",
+                      )}{" "}
                     </p>
                     <button
                       disabled={busy}
                       onClick={() => change(item, "removed")}
                     >
-                      Confirm removal
+                      {" "}
+                      {t("Confirm removal")}{" "}
                     </button>
                     <button disabled={busy} onClick={() => setRemove(null)}>
-                      Cancel
+                      {" "}
+                      {t("Cancel")}{" "}
                     </button>
                   </div>
                 ) : (
                   <button disabled={busy} onClick={() => setRemove(item._id)}>
-                    Remove listing
+                    {" "}
+                    {t("Remove listing")}{" "}
                   </button>
                 )}
               </article>
             ))}
-            <nav aria-label="Seller pagination">
+            <nav aria-label={t("Seller pagination")}>
               <button
                 disabled={busy || data.page <= 1}
                 onClick={() => {
@@ -166,11 +187,12 @@ export default function MyListings({ user }) {
                   setParams(next);
                 }}
               >
-                Previous
+                {" "}
+                {t("Previous")}{" "}
               </button>
               <span>
                 {" "}
-                Page {data.page} of{" "}
+                {t("Page")} {data.page} {t("of")}{" "}
                 {Math.max(1, Math.ceil(data.count / data.limit))}{" "}
               </span>
               <button
@@ -181,7 +203,8 @@ export default function MyListings({ user }) {
                   setParams(next);
                 }}
               >
-                Next
+                {" "}
+                {t("Next")}{" "}
               </button>
             </nav>
           </>

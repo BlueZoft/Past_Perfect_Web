@@ -1,5 +1,5 @@
+import { t, errorText, useI18n } from "../i18n";
 import { Link } from "react-router-dom";
-
 const Hero = ({ HeroImg, decoHero }) => {
   // const navigate = useNavigate()
   return (
@@ -7,9 +7,9 @@ const Hero = ({ HeroImg, decoHero }) => {
       <div className="container">
         <div className="hero-content">
           <div className="block-left">
-            <h1>Ready to clean out your closet?</h1>
+            <h1>{t("Ready to clean out your closet?")}</h1>
             <Link className="block-left-link" to="/publish">
-              <button>Sell now</button>
+              <button>{t("Sell now")}</button>
             </Link>
           </div>
         </div>
@@ -19,5 +19,4 @@ const Hero = ({ HeroImg, decoHero }) => {
     </div>
   );
 };
-
 export default Hero;

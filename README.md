@@ -1,4 +1,4 @@
-# PastPerfect Web — v2.3
+# PastPerfect Web — v2.4
 
 React frontend for a Sri Lankan used-item marketplace. This version repairs the prototype's account and listing flows and replaces Create React App with Vite and React 18.
 
@@ -36,10 +36,12 @@ Build output is `dist/`. Production hosting must serve `index.html` for client r
 
 There is no automatic data migration from the old prototype. See the backend API contract for breaking changes. Signup omits avatar upload; profile photos are managed from My profile.
 
-See [the action plan](docs/ACTION_PLAN.md) and [configuration and release notes](docs/V2.md). This is a foundation release, not a complete marketplace: verification, recovery, advanced abuse controls and managed transactions remain planned.
+See [the action plan](docs/ACTION_PLAN.md) and [configuration and release notes](docs/V2.md). This is a foundation release, not a complete marketplace: advanced abuse controls and managed transactions remain planned.
 
 Version 2.1 seller management details, limitations and validation are recorded in [release notes](docs/V2.md).
 
 Version 2.2 adds category/location discovery, public seller profiles, profile editing, favourites and buyer/seller enquiries. See [release notes](docs/V2.md) for behavior and limitations.
 
 See [v2.3 release notes](docs/V2.md) for media, reporting/blocking and moderation behavior and limitations.
+
+Version 2.4 adds email verification/recovery pages, an unread notification indicator and inbox, and English/Sinhala/Tamil language switching across the application. Language choice persists locally; user-written listings/messages are never machine-translated. Notification polling runs every 30 seconds while signed in and on window focus. See [localization guidance](docs/LOCALIZATION.md) and the backend account guide for local email/SMTP configuration.

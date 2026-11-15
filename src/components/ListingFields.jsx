@@ -1,14 +1,20 @@
+import { t, errorText, useI18n } from "../i18n";
 import { conditions, sizes } from "../lib/listing";
 import CatalogueFields from "./CatalogueFields";
 export default function ListingFields({ value, onChange, disabled = false }) {
+  useI18n();
   const change = (event) =>
-    onChange({ ...value, [event.target.name]: event.target.value });
+    onChange({
+      ...value,
+      [event.target.name]: event.target.value,
+    });
   return (
     <fieldset disabled={disabled} className="listing-fields">
-      <legend>Listing details</legend>
+      <legend>{t("Listing details")}</legend>
       <CatalogueFields value={value} onChange={onChange} />
       <label>
-        Title
+        {" "}
+        {t("Title")}{" "}
         <input
           name="title"
           required
@@ -19,7 +25,8 @@ export default function ListingFields({ value, onChange, disabled = false }) {
         />
       </label>
       <label>
-        Description
+        {" "}
+        {t("Description")}{" "}
         <textarea
           name="description"
           required
@@ -30,7 +37,8 @@ export default function ListingFields({ value, onChange, disabled = false }) {
         />
       </label>
       <label>
-        Price (LKR)
+        {" "}
+        {t("Price (LKR)")}{" "}
         <input
           name="price"
           type="number"
@@ -43,26 +51,30 @@ export default function ListingFields({ value, onChange, disabled = false }) {
         />
       </label>
       <label>
-        Condition
+        {" "}
+        {t("Condition")}{" "}
         <select
           name="condition"
           required
           value={value.condition}
           onChange={change}
         >
-          <option value="">Select condition</option>
+          <option value="">{t("Select condition")}</option>
           {conditions.map((item) => (
-            <option key={item}>{item}</option>
+            <option key={item} value={item}>
+              {t(item)}
+            </option>
           ))}
         </select>
       </label>
       {value.category === "clothing" && (
         <label>
-          Size (optional)
+          {" "}
+          {t("Size (optional)")}{" "}
           <select name="size" value={value.size} onChange={change}>
             {sizes.map((item) => (
               <option key={item} value={item}>
-                {item || "Not applicable"}
+                {item || t("Not applicable")}
               </option>
             ))}
           </select>

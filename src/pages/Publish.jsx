@@ -1,9 +1,11 @@
+import { t, errorText, useI18n } from "../i18n";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { api, errorMessage } from "../api";
 import ListingFields from "../components/ListingFields";
 import { listingError } from "../lib/listing";
 export default function Publish({ token }) {
+  useI18n();
   const navigate = useNavigate();
   const [value, setValue] = useState({
     category: "other",
@@ -45,7 +47,10 @@ export default function Publish({ token }) {
     setError("");
     setPictures((previous) => [
       ...previous,
-      ...files.map((file) => ({ file, preview: URL.createObjectURL(file) })),
+      ...files.map((file) => ({
+        file,
+        preview: URL.createObjectURL(file),
+      })),
     ]);
   };
   const remove = (index) => {
@@ -78,30 +83,39 @@ export default function Publish({ token }) {
   if (!token) return <Navigate to="/login" replace />;
   return (
     <main className="container">
-      <h1>Sell an item</h1>
+      <h1>{t("Sell an item")}</h1>
       <form onSubmit={submit}>
         <ListingFields value={value} onChange={setValue} disabled={busy} />
         <fieldset disabled={busy}>
-          <legend>Photos</legend>
-          <p>Add 1–3 JPEG, PNG or WebP photos, up to 5 MB each.</p>
+          <legend>{t("Photos")}</legend>
+          <p>{t("Add 1\u20133 JPEG, PNG or WebP photos, up to 5 MB each.")}</p>
           {pictures.map((item, index) => (
             <div key={item.preview}>
               <img
                 src={item.preview}
-                alt={`Preview ${index + 1}`}
-                style={{ maxWidth: 200, maxHeight: 200 }}
+                alt={t("Photo preview {0}", {
+                  0: index + 1,
+                })}
+                style={{
+                  maxWidth: 200,
+                  maxHeight: 200,
+                }}
               />
               <button
                 type="button"
                 onClick={() => remove(index)}
-                aria-label={`Remove photo ${index + 1}`}
+                aria-label={t("Remove photo {0}", {
+                  0: index + 1,
+                })}
               >
-                Remove
+                {" "}
+                {t("Remove")}{" "}
               </button>
             </div>
           ))}
           <label>
-            Add photos
+            {" "}
+            {t("Add photos")}{" "}
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp"
@@ -110,8 +124,10 @@ export default function Publish({ token }) {
             />
           </label>
         </fieldset>
-        {error && <p role="alert">{error}</p>}
-        <button disabled={busy}>{busy ? "Publishing…" : "Publish"}</button>
+        {error && <p role="alert">{errorText(error)}</p>}
+        <button disabled={busy}>
+          {busy ? t("Publishing\u2026") : t("Publish")}
+        </button>
       </form>
     </main>
   );

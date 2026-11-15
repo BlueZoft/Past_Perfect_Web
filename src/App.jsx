@@ -1,3 +1,4 @@
+import { t, errorText, useI18n } from "./i18n";
 import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { api } from "./api";
@@ -20,7 +21,12 @@ import Enquiries from "./pages/Enquiries";
 import Enquiry from "./pages/Enquiry";
 import BlockedUsers from "./pages/BlockedUsers";
 import Moderation from "./pages/Moderation";
+import AccountLink from "./pages/AccountLink";
+import Recovery from "./pages/Recovery";
+import Notifications from "./pages/Notifications";
+import MyReports from "./pages/MyReports";
 export default function App() {
+  useI18n();
   const [user, setUser] = useState(null),
     [ready, setReady] = useState(false);
   useEffect(() => {
@@ -30,7 +36,7 @@ export default function App() {
       .catch(() => {})
       .finally(() => setReady(true));
   }, []);
-  if (!ready) return <p role="status">Loading session…</p>;
+  if (!ready) return <p role="status">{t("Loading session\u2026")}</p>;
   return (
     <BrowserRouter>
       <Header logo={Logo} token={user} setUser={setUser} />
@@ -55,6 +61,17 @@ export default function App() {
         <Route path="/enquiries/:id" element={<Enquiry user={user} />} />
         <Route path="/blocked-users" element={<BlockedUsers user={user} />} />
         <Route path="/admin/moderation" element={<Moderation user={user} />} />
+        <Route path="/recover" element={<Recovery />} />
+        <Route
+          path="/verify-email"
+          element={<AccountLink mode="verify" setUser={setUser} />}
+        />
+        <Route
+          path="/reset-password"
+          element={<AccountLink mode="reset" setUser={setUser} />}
+        />
+        <Route path="/reports" element={<MyReports user={user} />} />
+        <Route path="/notifications" element={<Notifications user={user} />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

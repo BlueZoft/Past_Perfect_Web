@@ -1,8 +1,10 @@
+import { t, errorText, useI18n } from "../i18n";
 import { useEffect, useState } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { api, errorMessage } from "../api";
 import Pagination from "../components/Pagination";
 export default function BlockedUsers({ user }) {
+  useI18n();
   const [params, setParams] = useSearchParams();
   const page = params.get("page") || "1";
   const [data, setData] = useState(null),
@@ -15,7 +17,11 @@ export default function BlockedUsers({ user }) {
     setData(null);
     setError("");
     api
-      .get("/user/blocks", { params: { page } })
+      .get("/user/blocks", {
+        params: {
+          page,
+        },
+      })
       .then((r) => {
         if (active) setData(r.data);
       })
@@ -31,7 +37,9 @@ export default function BlockedUsers({ user }) {
     setError("");
     try {
       await api.delete("/user/blocks/" + id);
-      setParams({ page: "1" });
+      setParams({
+        page: "1",
+      });
       setRetry((value) => value + 1);
     } catch (err) {
       setError(errorMessage(err));
@@ -42,26 +50,29 @@ export default function BlockedUsers({ user }) {
   if (!user) return <Navigate to="/login" replace />;
   return (
     <main className="container">
-      <h1>Blocked users</h1>
+      <h1>{t("Blocked users")}</h1>
       {error && (
         <div role="alert">
-          {error}
-          <button onClick={() => setRetry(retry + 1)}>Retry</button>
+          {errorText(error)}
+          <button onClick={() => setRetry(retry + 1)}>{t("Retry")}</button>
         </div>
       )}
-      {!data && !error && <p role="status">Loading blocked users…</p>}
+      {!data && !error && (
+        <p role="status">{t("Loading blocked users\u2026")}</p>
+      )}
       {data && (
         <>
-          {!data.blocks.length && <p>No blocked users.</p>}
+          {!data.blocks.length && <p>{t("No blocked users.")}</p>}
           {data.blocks.map((item) => (
             <article key={item._id}>
-              <p>{item.blocked?.account.username || "Deleted account"}</p>
+              <p>{item.blocked?.account.username || t("Deleted account")}</p>
               {item.blocked && (
                 <button
                   disabled={busy}
                   onClick={() => unblock(item.blocked._id)}
                 >
-                  Unblock user
+                  {" "}
+                  {t("Unblock user")}{" "}
                 </button>
               )}
             </article>
@@ -69,7 +80,11 @@ export default function BlockedUsers({ user }) {
           <Pagination
             {...data}
             disabled={busy}
-            onChange={(value) => setParams({ page: String(value) })}
+            onChange={(value) =>
+              setParams({
+                page: String(value),
+              })
+            }
           />
         </>
       )}

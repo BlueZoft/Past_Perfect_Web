@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, errorMessage } from "../api";
+import { currentLanguage, t, errorText, useI18n } from "../i18n";
 export default function SignUp({ setUser }) {
+  useI18n();
   const [email, setEmail] = useState(""),
     [password, setPassword] = useState(""),
     [username, setUsername] = useState("");
@@ -17,6 +19,7 @@ export default function SignUp({ setUser }) {
         email,
         password,
         username,
+        locale: currentLanguage(),
       });
       setUser(data);
       navigate("/");
@@ -28,9 +31,10 @@ export default function SignUp({ setUser }) {
   }
   return (
     <form className="signup-form container" onSubmit={submit}>
-      <h1>Sign up</h1>
+      <h1>{t("Sign up")}</h1>
       <label>
-        Username
+        {" "}
+        {t("Username")}{" "}
         <input
           required
           maxLength={80}
@@ -39,7 +43,8 @@ export default function SignUp({ setUser }) {
         />
       </label>
       <label>
-        Email
+        {" "}
+        {t("Email")}{" "}
         <input
           type="email"
           autoComplete="email"
@@ -50,7 +55,8 @@ export default function SignUp({ setUser }) {
         />
       </label>
       <label>
-        Password
+        {" "}
+        {t("Password")}{" "}
         <input
           type="password"
           autoComplete="new-password"
@@ -60,9 +66,11 @@ export default function SignUp({ setUser }) {
           onChange={(e) => setPassword(e.target.value)}
         />
       </label>
-      <button disabled={busy}>{busy ? "Please wait…" : "Sign up"}</button>
-      {error && <p role="alert">{error}</p>}
-      <Link to="/login">Log in</Link>
+      <button disabled={busy}>
+        {busy ? t("Please wait\u2026") : t("Sign up")}
+      </button>
+      {error && <p role="alert">{errorText(error)}</p>}
+      <Link to="/login">{t("Log in")}</Link>
     </form>
   );
 }

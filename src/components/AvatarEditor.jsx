@@ -1,6 +1,8 @@
+import { t, errorText, useI18n } from "../i18n";
 import { useState, useEffect, useRef } from "react";
 import { api, errorMessage, imageUrl } from "../api";
 export default function AvatarEditor({ user, setUser }) {
+  useI18n();
   const [file, setFile] = useState(null),
     [preview, setPreview] = useState(""),
     [error, setError] = useState(""),
@@ -31,7 +33,9 @@ export default function AvatarEditor({ user, setUser }) {
       let response;
       if (remove)
         response = await api.delete("/user/avatar", {
-          data: { version: user.avatarVersion || 0 },
+          data: {
+            version: user.avatarVersion || 0,
+          },
         });
       else {
         const form = new FormData();
@@ -51,16 +55,20 @@ export default function AvatarEditor({ user, setUser }) {
   const current = user.account.avatar?.url || user.account.avatar?.secure_url;
   return (
     <section>
-      <h2>Profile photo</h2>
+      <h2>{t("Profile photo")}</h2>
       {current && (
         <img
           src={imageUrl(current)}
-          alt="Current avatar"
-          style={{ maxWidth: 120, maxHeight: 120 }}
+          alt={t("Current avatar")}
+          style={{
+            maxWidth: 120,
+            maxHeight: 120,
+          }}
         />
       )}
       <label>
-        New avatar
+        {" "}
+        {t("New avatar")}{" "}
         <input
           ref={input}
           disabled={busy}
@@ -72,19 +80,24 @@ export default function AvatarEditor({ user, setUser }) {
       {preview && (
         <img
           src={preview}
-          alt="Avatar preview"
-          style={{ maxWidth: 120, maxHeight: 120 }}
+          alt={t("Avatar preview")}
+          style={{
+            maxWidth: 120,
+            maxHeight: 120,
+          }}
         />
       )}
       <button disabled={busy || !file} onClick={() => change(false)}>
-        Save avatar
+        {" "}
+        {t("Save avatar")}{" "}
       </button>
       {current && (
         <button disabled={busy} onClick={() => change(true)}>
-          Remove avatar
+          {" "}
+          {t("Remove avatar")}{" "}
         </button>
       )}
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert">{errorText(error)}</p>}
     </section>
   );
 }
