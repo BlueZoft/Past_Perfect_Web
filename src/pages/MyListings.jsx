@@ -142,6 +142,7 @@ export default function MyListings({ user }) {
                       </button>{" "}
                     </>
                   )}
+                {item.policyReview && <p>{t("Awaiting policy review")}</p>}
                 {item.moderationHidden && (
                   <p>
                     {" "}

@@ -1,6 +1,6 @@
 import { t, errorText, useI18n } from "./i18n";
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { api } from "./api";
 import "./App.css";
 import Header from "./components/Header";
@@ -25,6 +25,10 @@ import AccountLink from "./pages/AccountLink";
 import Recovery from "./pages/Recovery";
 import Notifications from "./pages/Notifications";
 import MyReports from "./pages/MyReports";
+import AccountStatus from "./pages/AccountStatus";
+import AccountModeration from "./pages/AccountModeration";
+import Policy from "./pages/Policy";
+import PolicyReview from "./pages/PolicyReview";
 export default function App() {
   useI18n();
   const [user, setUser] = useState(null),
@@ -40,41 +44,71 @@ export default function App() {
   return (
     <BrowserRouter>
       <Header logo={Logo} token={user} setUser={setUser} />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/offer/:id" element={<Offer user={user} />} />
-        <Route path="/login" element={<Login setUser={setUser} />} />
-        <Route path="/signup" element={<SignUp setUser={setUser} />} />
-        <Route path="/publish" element={<Publish token={user} />} />
-        <Route path="/my-listings" element={<MyListings user={user} />} />
-        <Route
-          path="/my-listings/:id/edit"
-          element={<EditListing user={user} />}
-        />
-        <Route path="/seller/:id" element={<Seller user={user} />} />
-        <Route
-          path="/profile"
-          element={<Profile user={user} setUser={setUser} />}
-        />
-        <Route path="/favourites" element={<Favourites user={user} />} />
-        <Route path="/enquiries" element={<Enquiries user={user} />} />
-        <Route path="/enquiries/:id" element={<Enquiry user={user} />} />
-        <Route path="/blocked-users" element={<BlockedUsers user={user} />} />
-        <Route path="/admin/moderation" element={<Moderation user={user} />} />
-        <Route path="/recover" element={<Recovery />} />
-        <Route
-          path="/verify-email"
-          element={<AccountLink mode="verify" setUser={setUser} />}
-        />
-        <Route
-          path="/reset-password"
-          element={<AccountLink mode="reset" setUser={setUser} />}
-        />
-        <Route path="/reports" element={<MyReports user={user} />} />
-        <Route path="/notifications" element={<Notifications user={user} />} />
-        <Route path="/payment" element={<Payment />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      {user?.suspended ? (
+        <Routes>
+          <Route
+            path="/account-status"
+            element={<AccountStatus user={user} setUser={setUser} />}
+          />
+          <Route
+            path="/notifications"
+            element={<Notifications user={user} />}
+          />
+          <Route path="*" element={<Navigate to="/account-status" replace />} />
+        </Routes>
+      ) : (
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/offer/:id" element={<Offer user={user} />} />
+          <Route path="/login" element={<Login setUser={setUser} />} />
+          <Route path="/signup" element={<SignUp setUser={setUser} />} />
+          <Route path="/publish" element={<Publish token={user} />} />
+          <Route path="/my-listings" element={<MyListings user={user} />} />
+          <Route
+            path="/my-listings/:id/edit"
+            element={<EditListing user={user} />}
+          />
+          <Route path="/seller/:id" element={<Seller user={user} />} />
+          <Route
+            path="/profile"
+            element={<Profile user={user} setUser={setUser} />}
+          />
+          <Route path="/favourites" element={<Favourites user={user} />} />
+          <Route path="/enquiries" element={<Enquiries user={user} />} />
+          <Route path="/enquiries/:id" element={<Enquiry user={user} />} />
+          <Route path="/blocked-users" element={<BlockedUsers user={user} />} />
+          <Route
+            path="/admin/moderation"
+            element={<Moderation user={user} />}
+          />
+          <Route path="/recover" element={<Recovery />} />
+          <Route
+            path="/verify-email"
+            element={<AccountLink mode="verify" setUser={setUser} />}
+          />
+          <Route
+            path="/reset-password"
+            element={<AccountLink mode="reset" setUser={setUser} />}
+          />
+          <Route path="/reports" element={<MyReports user={user} />} />
+          <Route
+            path="/notifications"
+            element={<Notifications user={user} />}
+          />
+          <Route path="/payment" element={<Payment />} />
+          <Route path="*" element={<NotFound />} />
+          <Route
+            path="/account-status"
+            element={<AccountStatus user={user} setUser={setUser} />}
+          />
+          <Route
+            path="/admin/accounts"
+            element={<AccountModeration user={user} />}
+          />
+          <Route path="/policy" element={<Policy />} />
+          <Route path="/admin/policy" element={<PolicyReview user={user} />} />
+        </Routes>
+      )}
     </BrowserRouter>
   );
 }

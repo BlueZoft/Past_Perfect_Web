@@ -1,5 +1,5 @@
 import { t, errorText, useI18n } from "../i18n";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { api, errorMessage } from "../api";
 import ListingFields from "../components/ListingFields";
@@ -73,7 +73,7 @@ export default function Publish({ token }) {
         form.append("picture" + (index + 1), item.file),
       );
       const { data } = await api.post("/offer/publish", form);
-      navigate("/offer/" + data._id);
+      navigate(data.moderationHidden ? "/my-listings" : "/offer/" + data._id);
     } catch (err) {
       setError(errorMessage(err));
     } finally {
@@ -84,6 +84,7 @@ export default function Publish({ token }) {
   return (
     <main className="container">
       <h1>{t("Sell an item")}</h1>
+      <Link to="/policy">{t("Read marketplace rules before publishing")}</Link>
       <form onSubmit={submit}>
         <ListingFields value={value} onChange={setValue} disabled={busy} />
         <fieldset disabled={busy}>

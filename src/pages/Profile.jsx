@@ -65,6 +65,7 @@ export default function Profile({ user, setUser }) {
       </form>
       {error && <p role="alert">{errorText(error)}</p>}
       {saved && <p role="status">{t("Profile saved.")}</p>}
+      <Link to="/account-status">{t("Account status")}</Link>
       <Verification user={user} setUser={setUser} />
       <AvatarEditor user={user} setUser={setUser} />
       <Link to="/reports">{t("My reports")}</Link>

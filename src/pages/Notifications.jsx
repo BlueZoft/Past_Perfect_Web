@@ -4,6 +4,7 @@ import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { api, errorMessage } from "../api";
 import Pagination from "../components/Pagination";
 const titles = {
+  account: "Account status update",
   message: "New enquiry message",
   moderation: "Listing moderation update",
   report: "Your report has been reviewed",
