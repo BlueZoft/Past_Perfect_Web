@@ -899,3 +899,9 @@ input {
 button:disabled { opacity: .5; cursor: default; }
 [role="alert"] { color: #a20d20; }
 @media (max-width: 640px) { .offer-container { flex-direction: column; } .container { width: 94%; } }
+
+.listing-fields { display: grid; gap: 1rem; margin: 1rem 0; }
+.listing-fields label { display: grid; gap: .4rem; }
+.listing-fields input, .listing-fields textarea, .listing-fields select { padding: .6rem; max-width: 100%; }
+.seller-listing { border-bottom: 1px solid #ccc; padding: 1rem 0; }
+.seller-listing button { margin: .3rem; }

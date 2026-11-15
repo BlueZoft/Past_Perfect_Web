@@ -25,7 +25,10 @@ export default function Header({ logo, token, setUser }) {
         <Link to="/">Browse items</Link> {" · "}
         <Link to="/publish">Sell an item</Link> {" · "}
         {token ? (
-          <button onClick={logout}>Sign out</button>
+          <>
+            <Link to="/my-listings">My listings</Link> {" · "}
+            <button onClick={logout}>Sign out</button>
+          </>
         ) : (
           <>
             <Link to="/login">Log in</Link> {" · "}

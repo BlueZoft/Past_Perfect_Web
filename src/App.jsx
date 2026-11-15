@@ -11,6 +11,8 @@ import SignUp from "./pages/SignUp";
 import Publish from "./pages/Publish";
 import Payment from "./pages/Payment";
 import NotFound from "./pages/NotFound";
+import MyListings from "./pages/MyListings";
+import EditListing from "./pages/EditListing";
 export default function App() {
   const [user, setUser] = useState(null),
     [ready, setReady] = useState(false);
@@ -31,6 +33,11 @@ export default function App() {
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/signup" element={<SignUp setUser={setUser} />} />
         <Route path="/publish" element={<Publish token={user} />} />
+        <Route path="/my-listings" element={<MyListings user={user} />} />
+        <Route
+          path="/my-listings/:id/edit"
+          element={<EditListing user={user} />}
+        />
         <Route path="/payment" element={<Payment />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

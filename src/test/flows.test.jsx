@@ -6,7 +6,7 @@ import {
   waitFor,
   cleanup,
 } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { vi, afterEach, test, expect } from "vitest";
 import Home from "../pages/Home";
 import Offer from "../pages/Offer";
@@ -14,7 +14,7 @@ import Login from "../pages/Login";
 import Payment from "../pages/Payment";
 import { api } from "../api";
 vi.mock("../api", () => ({
-  api: { get: vi.fn(), post: vi.fn() },
+  api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
   errorMessage: (e) =>
     e.response?.data?.error || "Unable to connect. Please try again.",
   imageUrl: (url) => url,
@@ -117,4 +117,166 @@ test("signup collects username and sends JSON through the shared client", async 
     email: "test@example.invalid",
     password: "test-password",
   });
+});
+
+test("publishing reports API errors instead of crashing on a shadowed helper", async () => {
+  const { default: Publish } = await import("../pages/Publish");
+  const create = URL.createObjectURL,
+    revoke = URL.revokeObjectURL;
+  URL.createObjectURL = vi.fn(() => "blob:photo");
+  URL.revokeObjectURL = vi.fn();
+  try {
+    api.post.mockRejectedValue({
+      response: { data: { error: "Upload temporarily unavailable" } },
+    });
+    renderRoute(<Publish token={{ _id: "seller" }} />);
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: "A used book" },
+    });
+    fireEvent.change(screen.getByLabelText("Description"), {
+      target: { value: "A good book in used condition" },
+    });
+    fireEvent.change(screen.getByLabelText("Price (LKR)"), {
+      target: { value: "100" },
+    });
+    fireEvent.change(screen.getByLabelText("Condition"), {
+      target: { value: "Used" },
+    });
+    fireEvent.change(screen.getByLabelText("Add photos"), {
+      target: {
+        files: [new File(["image"], "book.png", { type: "image/png" })],
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Publish" }));
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "Upload temporarily unavailable",
+    );
+    cleanup();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:photo");
+  } finally {
+    URL.createObjectURL = create;
+    URL.revokeObjectURL = revoke;
+  }
+});
+
+test("seller actions send listing versions and removal needs confirmation", async () => {
+  const { default: MyListings } = await import("../pages/MyListings");
+  const listing = {
+    _id: "listing1",
+    title: "Book",
+    price: 100,
+    status: "active",
+    __v: 3,
+  };
+  api.get.mockResolvedValue({
+    data: { offers: [listing], count: 1, page: 1, limit: 10 },
+  });
+  api.patch.mockResolvedValue({
+    data: { ...listing, status: "reserved", __v: 4 },
+  });
+  api.delete.mockResolvedValue({});
+  renderRoute(<MyListings user={{ _id: "seller" }} />);
+  await screen.findByText("Book");
+  fireEvent.click(screen.getByText("Reserve"));
+  await waitFor(() =>
+    expect(api.patch).toHaveBeenCalledWith("/offer/listing1/status", {
+      status: "reserved",
+      version: 3,
+    }),
+  );
+  await waitFor(() => expect(screen.queryByRole("status")).toBeNull());
+  fireEvent.click(screen.getByText("Remove listing"));
+  expect(api.delete).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByText("Cancel"));
+  expect(api.delete).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByText("Remove listing"));
+  fireEvent.click(screen.getByText("Confirm removal"));
+  await waitFor(() =>
+    expect(api.delete).toHaveBeenCalledWith("/offer/listing1", {
+      data: { version: 3 },
+    }),
+  );
+});
+
+test("seller dashboard exposes conflicts with reload and does not silently discard them", async () => {
+  const { default: MyListings } = await import("../pages/MyListings");
+  api.get.mockResolvedValue({
+    data: {
+      offers: [
+        { _id: "1", title: "Book", price: 100, status: "active", __v: 0 },
+      ],
+      count: 1,
+      page: 1,
+      limit: 10,
+    },
+  });
+  api.patch.mockRejectedValue({
+    response: {
+      status: 409,
+      data: { error: "Listing changed. Reload before trying again." },
+    },
+  });
+  renderRoute(<MyListings user={{ _id: "seller" }} />);
+  await screen.findByText("Book");
+  fireEvent.click(screen.getByText("Mark sold"));
+  expect((await screen.findByRole("alert")).textContent).toContain(
+    "Listing changed",
+  );
+  fireEvent.click(screen.getByText("Reload listings"));
+  await waitFor(() => expect(api.get).toHaveBeenCalledTimes(2));
+});
+
+test("edit form preserves the original version when saving", async () => {
+  const { default: EditListing } = await import("../pages/EditListing");
+  api.get.mockResolvedValue({
+    data: {
+      _id: "1",
+      title: "Book",
+      description: "A book in good condition",
+      price: 100,
+      condition: "Used",
+      size: "",
+      status: "active",
+      owner: { _id: "seller" },
+      __v: 7,
+    },
+  });
+  api.patch.mockResolvedValue({});
+  render(
+    <MemoryRouter initialEntries={["/my-listings/1/edit"]}>
+      <Routes>
+        <Route
+          path="/my-listings/:id/edit"
+          element={<EditListing user={{ _id: "seller" }} />}
+        />
+        <Route path="/my-listings" element={<p>Saved dashboard</p>} />
+      </Routes>
+    </MemoryRouter>,
+  );
+  await screen.findByLabelText("Title");
+  fireEvent.change(screen.getByLabelText("Price (LKR)"), {
+    target: { value: "200" },
+  });
+  fireEvent.click(screen.getByText("Save changes"));
+  await waitFor(() =>
+    expect(api.patch).toHaveBeenCalledWith(
+      "/offer/1",
+      expect.objectContaining({ price: 200, version: 7 }),
+    ),
+  );
+  await screen.findByText("Saved dashboard");
+});
+
+test("seller management redirects anonymous users before fetching private data", async () => {
+  const { default: MyListings } = await import("../pages/MyListings");
+  render(
+    <MemoryRouter initialEntries={["/my-listings"]}>
+      <Routes>
+        <Route path="/my-listings" element={<MyListings user={null} />} />
+        <Route path="/login" element={<p>Please log in</p>} />
+      </Routes>
+    </MemoryRouter>,
+  );
+  await screen.findByText("Please log in");
+  expect(api.get).not.toHaveBeenCalled();
 });
