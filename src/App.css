@@ -905,3 +905,8 @@ button:disabled { opacity: .5; cursor: default; }
 .listing-fields input, .listing-fields textarea, .listing-fields select { padding: .6rem; max-width: 100%; }
 .seller-listing { border-bottom: 1px solid #ccc; padding: 1rem 0; }
 .seller-listing button { margin: .3rem; }
+
+.header nav { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+main form label { display: grid; gap: .4rem; margin: .7rem 0; }
+main textarea { min-height: 6rem; max-width: 100%; }
+main article, main li { overflow-wrap: anywhere; }

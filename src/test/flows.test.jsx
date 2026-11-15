@@ -14,10 +14,26 @@ import Login from "../pages/Login";
 import Payment from "../pages/Payment";
 import { api } from "../api";
 vi.mock("../api", () => ({
-  api: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() },
+  api: {
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+    put: vi.fn(),
+  },
   errorMessage: (e) =>
     e.response?.data?.error || "Unable to connect. Please try again.",
   imageUrl: (url) => url,
+  loadCatalogue: async () => ({
+    categories: ["other", "clothing", "books"],
+    locations: [
+      {
+        id: "sample-district",
+        label: "Example district (placeholder)",
+        towns: ["Example town"],
+      },
+    ],
+  }),
 }));
 afterEach(() => {
   cleanup();
@@ -74,7 +90,7 @@ test("listing detail renders the API contract", async () => {
   renderRoute(<Offer />);
   await screen.findByText("A used book");
   expect(screen.getByText("LKR 500")).toBeTruthy();
-  expect(screen.getByText("Seller: Seller")).toBeTruthy();
+  expect(screen.getByRole("link", { name: "Seller" })).toBeTruthy();
 });
 test("login reports a network failure without crashing", async () => {
   api.post.mockRejectedValue(new Error());
@@ -279,4 +295,149 @@ test("seller management redirects anonymous users before fetching private data",
   );
   await screen.findByText("Please log in");
   expect(api.get).not.toHaveBeenCalled();
+});
+
+test("district changes clear stale town filters while preserving search", async () => {
+  api.get.mockResolvedValue({
+    data: { offers: [], count: 0, page: 1, limit: 10 },
+  });
+  renderRoute(
+    <Home />,
+    "/?title=Book&district=sample-district&town=Example+town",
+  );
+  await screen.findByText("No listings match your search.");
+  fireEvent.change(screen.getByLabelText("District"), {
+    target: { value: "" },
+  });
+  await waitFor(() => {
+    const query = api.get.mock.calls.at(-1)[1].params;
+    expect(query.get("district")).toBeNull();
+    expect(query.get("town")).toBeNull();
+    expect(query.get("title")).toBe("Book");
+  });
+});
+
+test("listing actions save a favourite and open a buyer enquiry", async () => {
+  const { default: ListingActions } =
+    await import("../components/ListingActions");
+  api.get.mockResolvedValue({ data: { saved: false } });
+  api.put.mockResolvedValue({});
+  api.post.mockResolvedValue({ data: { _id: "thread1" } });
+  render(
+    <MemoryRouter initialEntries={["/offer/1"]}>
+      <Routes>
+        <Route
+          path="/offer/:id"
+          element={
+            <ListingActions
+              listing={{ _id: "1", status: "active", owner: { _id: "seller" } }}
+              user={{ _id: "buyer" }}
+            />
+          }
+        />
+        <Route path="/enquiries/:id" element={<p>Conversation opened</p>} />
+      </Routes>
+    </MemoryRouter>,
+  );
+  await waitFor(() =>
+    expect(screen.getByText("Save to favourites").disabled).toBe(false),
+  );
+  fireEvent.click(screen.getByText("Save to favourites"));
+  await screen.findByText("Remove favourite");
+  expect(api.put).toHaveBeenCalledWith("/user/favourites/1");
+  fireEvent.change(screen.getByLabelText("Ask the seller"), {
+    target: { value: "Is it available?" },
+  });
+  fireEvent.click(screen.getByText("Send enquiry"));
+  await screen.findByText("Conversation opened");
+  expect(api.post).toHaveBeenCalledWith("/offer/1/enquiries", {
+    message: "Is it available?",
+  });
+});
+
+test("seller cannot enquire about their own listing", async () => {
+  const { default: ListingActions } =
+    await import("../components/ListingActions");
+  api.get.mockResolvedValue({ data: { saved: false } });
+  renderRoute(
+    <ListingActions
+      listing={{ _id: "1", status: "active", owner: { _id: "seller" } }}
+      user={{ _id: "seller" }}
+    />,
+  );
+  await waitFor(() =>
+    expect(screen.getByText("Save to favourites").disabled).toBe(false),
+  );
+  expect(screen.queryByLabelText("Ask the seller")).toBeNull();
+});
+
+test("conversation renders plain text and sends replies to the routed thread", async () => {
+  const { default: Enquiry } = await import("../pages/Enquiry");
+  api.get.mockResolvedValue({
+    data: {
+      enquiry: {
+        title: "Book",
+        buyer: { _id: "buyer", account: { username: "Buyer" } },
+        seller: { _id: "seller", account: { username: "Seller" } },
+      },
+      messages: [
+        {
+          _id: "m1",
+          sender: "seller",
+          text: "<script>unsafe()</script>",
+          createdAt: "2026-01-01T00:00:00Z",
+        },
+      ],
+      count: 1,
+      page: 1,
+      limit: 10,
+    },
+  });
+  api.post.mockResolvedValue({});
+  render(
+    <MemoryRouter initialEntries={["/enquiries/t1"]}>
+      <Routes>
+        <Route
+          path="/enquiries/:id"
+          element={<Enquiry user={{ _id: "buyer" }} />}
+        />
+      </Routes>
+    </MemoryRouter>,
+  );
+  await screen.findByText("<script>unsafe()</script>");
+  expect(document.querySelector("script")).toBeNull();
+  fireEvent.change(screen.getByLabelText("Reply"), {
+    target: { value: "Thank you" },
+  });
+  fireEvent.click(screen.getByText("Send reply"));
+  await waitFor(() =>
+    expect(api.post).toHaveBeenCalledWith("/enquiry/t1/messages", {
+      message: "Thank you",
+    }),
+  );
+});
+
+test("profile form saves public fields only", async () => {
+  const { default: Profile } = await import("../pages/Profile");
+  const setUser = vi.fn();
+  api.patch.mockResolvedValue({
+    data: { _id: "u1", account: { username: "New name", bio: "Bio" } },
+  });
+  renderRoute(
+    <Profile
+      user={{ _id: "u1", account: { username: "Old name" } }}
+      setUser={setUser}
+    />,
+  );
+  fireEvent.change(screen.getByLabelText("Username"), {
+    target: { value: "New name" },
+  });
+  fireEvent.change(screen.getByLabelText("Bio"), { target: { value: "Bio" } });
+  fireEvent.click(screen.getByText("Save profile"));
+  await screen.findByText("Profile saved.");
+  expect(api.patch).toHaveBeenCalledWith("/user/profile", {
+    username: "New name",
+    bio: "Bio",
+  });
+  expect(setUser).toHaveBeenCalled();
 });

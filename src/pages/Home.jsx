@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api, errorMessage, imageUrl } from "../api";
+import CatalogueFields from "../components/CatalogueFields";
 export default function Home() {
   const [params, setParams] = useSearchParams();
   const query = params.toString();
@@ -42,6 +43,22 @@ export default function Home() {
     <main className="container">
       <h1>Find your next pre-loved item</h1>
       <section aria-label="Search filters" className="filters">
+        <CatalogueFields
+          filters
+          value={{
+            category: params.get("category") || "",
+            district: params.get("district") || "",
+            town: params.get("town") || "",
+          }}
+          onChange={(value) => {
+            const next = new URLSearchParams(params);
+            for (const key of ["category", "district", "town"]) {
+              value[key] ? next.set(key, value[key]) : next.delete(key);
+            }
+            next.set("page", "1");
+            setParams(next);
+          }}
+        />
         <label>
           Search
           <input

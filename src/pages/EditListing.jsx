@@ -31,6 +31,9 @@ export default function EditListing({ user }) {
         }
         setListing(data);
         setValue({
+          category: data.category || "other",
+          district: data.district || "",
+          town: data.town || "",
           title: data.title,
           description: data.description,
           price: data.price,

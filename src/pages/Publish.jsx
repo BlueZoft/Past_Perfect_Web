@@ -6,6 +6,9 @@ import { listingError } from "../lib/listing";
 export default function Publish({ token }) {
   const navigate = useNavigate();
   const [value, setValue] = useState({
+    category: "other",
+    district: "",
+    town: "",
     title: "",
     description: "",
     price: "",

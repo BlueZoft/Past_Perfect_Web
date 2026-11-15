@@ -1,10 +1,12 @@
 import { conditions, sizes } from "../lib/listing";
+import CatalogueFields from "./CatalogueFields";
 export default function ListingFields({ value, onChange, disabled = false }) {
   const change = (event) =>
     onChange({ ...value, [event.target.name]: event.target.value });
   return (
     <fieldset disabled={disabled} className="listing-fields">
       <legend>Listing details</legend>
+      <CatalogueFields value={value} onChange={onChange} />
       <label>
         Title
         <input
@@ -54,16 +56,18 @@ export default function ListingFields({ value, onChange, disabled = false }) {
           ))}
         </select>
       </label>
-      <label>
-        Size (optional)
-        <select name="size" value={value.size} onChange={change}>
-          {sizes.map((item) => (
-            <option key={item} value={item}>
-              {item || "Not applicable"}
-            </option>
-          ))}
-        </select>
-      </label>
+      {value.category === "clothing" && (
+        <label>
+          Size (optional)
+          <select name="size" value={value.size} onChange={change}>
+            {sizes.map((item) => (
+              <option key={item} value={item}>
+                {item || "Not applicable"}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
     </fieldset>
   );
 }

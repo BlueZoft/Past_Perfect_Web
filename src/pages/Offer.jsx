@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { api, errorMessage, imageUrl } from "../api";
-export default function Offer() {
+import ListingActions from "../components/ListingActions";
+export default function Offer({ user }) {
   const { id } = useParams();
   const [data, setData] = useState(null),
     [error, setError] = useState("");
@@ -42,8 +43,20 @@ export default function Offer() {
           <p>{data.description}</p>
           <p>Condition: {data.condition}</p>
           {data.size && <p>Size: {data.size}</p>}
-          <p>Seller: {data.owner?.account?.username || "Unavailable"}</p>
+          <p>
+            Seller:{" "}
+            {data.owner ? (
+              <Link to={"/seller/" + data.owner._id}>
+                {data.owner.account?.username || "Unavailable"}
+              </Link>
+            ) : (
+              "Unavailable"
+            )}
+          </p>
+          <p>Category: {data.category || "other"}</p>
+          <p>Location: {data.town || data.district || "Not specified"}</p>
           <p>Status: {data.status}</p>
+          <ListingActions listing={data} user={user} />
           <p>Online checkout is not available yet.</p>
         </section>
       </div>
