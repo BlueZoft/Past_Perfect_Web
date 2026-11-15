@@ -101,29 +101,38 @@ export default function MyListings({ user }) {
                 <p>
                   LKR {item.price.toLocaleString("en-LK")} · {item.status}
                 </p>
-                {["active", "reserved"].includes(item.status) && (
-                  <>
-                    <Link to={"/my-listings/" + item._id + "/edit"}>
-                      Edit listing
-                    </Link>{" "}
-                    <button
-                      disabled={busy}
-                      onClick={() =>
-                        change(
-                          item,
-                          item.status === "active" ? "reserved" : "active",
-                        )
-                      }
-                    >
-                      {item.status === "active" ? "Reserve" : "Make available"}
-                    </button>{" "}
-                    <button
-                      disabled={busy}
-                      onClick={() => change(item, "sold")}
-                    >
-                      Mark sold
-                    </button>{" "}
-                  </>
+                {!item.moderationHidden &&
+                  ["active", "reserved"].includes(item.status) && (
+                    <>
+                      <Link to={"/my-listings/" + item._id + "/edit"}>
+                        Edit listing
+                      </Link>{" "}
+                      <button
+                        disabled={busy}
+                        onClick={() =>
+                          change(
+                            item,
+                            item.status === "active" ? "reserved" : "active",
+                          )
+                        }
+                      >
+                        {item.status === "active"
+                          ? "Reserve"
+                          : "Make available"}
+                      </button>{" "}
+                      <button
+                        disabled={busy}
+                        onClick={() => change(item, "sold")}
+                      >
+                        Mark sold
+                      </button>{" "}
+                    </>
+                  )}
+                {item.moderationHidden && (
+                  <p>
+                    Hidden by moderation. You can remove this listing, but
+                    cannot edit or reactivate it.
+                  </p>
                 )}
                 {remove === item._id ? (
                   <div>

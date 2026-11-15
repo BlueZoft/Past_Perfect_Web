@@ -1,4 +1,4 @@
-# PastPerfect Web — v2.2
+# PastPerfect Web — v2.3
 
 React frontend for a Sri Lankan used-item marketplace. This version repairs the prototype's account and listing flows and replaces Create React App with Vite and React 18.
 
@@ -29,13 +29,17 @@ Build output is `dist/`. Production hosting must serve `index.html` for client r
 - Authenticated image publishing with Unicode titles and descriptions; clothing size is optional.
 - Seller dashboard with status filters, owner-only text/price editing, reserve/release, mark sold, and confirmed removal.
 - Public seller profiles, editable username/bio, private favourites, and participant-only buyer/seller enquiries.
+- Versioned listing photo replacement and profile avatar upload/removal.
+- Listing/user/message reporting, user blocking, and an admin-only moderation queue.
 - Local development images work without external credentials. Cloudinary is configured on the backend.
 - Payments are explicitly unavailable. No placeholder card collection, charges or buyer-protection promises.
 
-There is no automatic data migration from the old prototype. See the backend API contract for breaking changes. Avatar upload is intentionally removed from signup until profile management is implemented.
+There is no automatic data migration from the old prototype. See the backend API contract for breaking changes. Signup omits avatar upload; profile photos are managed from My profile.
 
-See [the action plan](docs/ACTION_PLAN.md) and [configuration and release notes](docs/V2.md). This is a foundation release, not a complete marketplace: moderation, verification and managed transactions remain planned.
+See [the action plan](docs/ACTION_PLAN.md) and [configuration and release notes](docs/V2.md). This is a foundation release, not a complete marketplace: verification, recovery, advanced abuse controls and managed transactions remain planned.
 
 Version 2.1 seller management details, limitations and validation are recorded in [release notes](docs/V2.md).
 
 Version 2.2 adds category/location discovery, public seller profiles, profile editing, favourites and buyer/seller enquiries. See [release notes](docs/V2.md) for behavior and limitations.
+
+See [v2.3 release notes](docs/V2.md) for media, reporting/blocking and moderation behavior and limitations.

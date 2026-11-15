@@ -3,6 +3,7 @@ import { Navigate, Link, useParams, useNavigate } from "react-router-dom";
 import { api, errorMessage } from "../api";
 import ListingFields from "../components/ListingFields";
 import { listingError } from "../lib/listing";
+import ReplaceImages from "../components/ReplaceImages";
 export default function EditListing({ user }) {
   const { id } = useParams(),
     navigate = useNavigate();
@@ -18,15 +19,18 @@ export default function EditListing({ user }) {
     setValue(null);
     setError("");
     api
-      .get("/offer/" + id)
+      .get("/user/offers/" + id)
       .then(({ data }) => {
         if (!active) return;
         if (data.owner?._id !== user._id) {
           setError("You cannot edit this listing");
           return;
         }
-        if (!["active", "reserved"].includes(data.status)) {
-          setError("Sold listings cannot be edited");
+        if (
+          data.moderationHidden ||
+          !["active", "reserved"].includes(data.status)
+        ) {
+          setError("This listing is sold or hidden and cannot be edited");
           return;
         }
         setListing(data);
@@ -86,11 +90,12 @@ export default function EditListing({ user }) {
       {value && (
         <form onSubmit={submit}>
           <ListingFields value={value} onChange={setValue} disabled={busy} />
-          <p>
-            Existing photos are kept. Photo replacement is not available yet.
-          </p>
+
           <button disabled={busy}>{busy ? "Saving…" : "Save changes"}</button>
         </form>
+      )}
+      {listing && value && (
+        <ReplaceImages listing={listing} onSaved={setListing} disabled={busy} />
       )}
       <Link to="/my-listings">Back to my listings</Link>
     </main>

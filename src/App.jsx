@@ -18,6 +18,8 @@ import Profile from "./pages/Profile";
 import Favourites from "./pages/Favourites";
 import Enquiries from "./pages/Enquiries";
 import Enquiry from "./pages/Enquiry";
+import BlockedUsers from "./pages/BlockedUsers";
+import Moderation from "./pages/Moderation";
 export default function App() {
   const [user, setUser] = useState(null),
     [ready, setReady] = useState(false);
@@ -43,7 +45,7 @@ export default function App() {
           path="/my-listings/:id/edit"
           element={<EditListing user={user} />}
         />
-        <Route path="/seller/:id" element={<Seller />} />
+        <Route path="/seller/:id" element={<Seller user={user} />} />
         <Route
           path="/profile"
           element={<Profile user={user} setUser={setUser} />}
@@ -51,6 +53,8 @@ export default function App() {
         <Route path="/favourites" element={<Favourites user={user} />} />
         <Route path="/enquiries" element={<Enquiries user={user} />} />
         <Route path="/enquiries/:id" element={<Enquiry user={user} />} />
+        <Route path="/blocked-users" element={<BlockedUsers user={user} />} />
+        <Route path="/admin/moderation" element={<Moderation user={user} />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

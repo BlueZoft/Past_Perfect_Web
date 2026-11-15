@@ -26,6 +26,11 @@ export default function Header({ logo, token, setUser }) {
         <Link to="/publish">Sell an item</Link> {" · "}
         {token ? (
           <>
+            {token.isAdmin && (
+              <>
+                <Link to="/admin/moderation">Moderation</Link> {" · "}
+              </>
+            )}
             <Link to="/profile">My profile</Link> {" · "}
             <Link to="/favourites">Favourites</Link> {" · "}
             <Link to="/enquiries">Enquiries</Link> {" · "}

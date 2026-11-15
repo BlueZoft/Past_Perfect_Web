@@ -3,7 +3,10 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { api, errorMessage } from "../api";
 import OfferCards from "../components/OfferCards";
 import Pagination from "../components/Pagination";
-export default function Seller() {
+import BlockControl from "../components/BlockControl";
+import ReportControl from "../components/ReportControl";
+import { imageUrl } from "../api";
+export default function Seller({ user }) {
   const { id } = useParams();
   const [params, setParams] = useSearchParams();
   const page = params.get("page") || "1";
@@ -38,6 +41,19 @@ export default function Seller() {
     <main className="container">
       <h1>{data.seller.account.username}</h1>
       <p>{data.seller.account.bio || "This seller has not added a bio."}</p>
+      {data.seller.account.avatar?.url && (
+        <img
+          src={imageUrl(data.seller.account.avatar.url)}
+          alt="Seller avatar"
+          style={{ maxWidth: 120, maxHeight: 120 }}
+        />
+      )}
+      {user && user._id !== id && (
+        <>
+          <BlockControl target={id} />
+          <ReportControl targetType="user" target={id} label="Report seller" />
+        </>
+      )}
       <h2>Active listings</h2>
       {!data.offers.length && <p>No active listings.</p>}
       <OfferCards offers={data.offers} />

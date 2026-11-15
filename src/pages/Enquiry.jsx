@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Navigate, Link, useParams, useSearchParams } from "react-router-dom";
 import { api, errorMessage } from "../api";
 import Pagination from "../components/Pagination";
+import BlockControl from "../components/BlockControl";
+import ReportControl from "../components/ReportControl";
 export default function Enquiry({ user }) {
   const { id } = useParams();
   const [params, setParams] = useSearchParams();
@@ -59,6 +61,15 @@ export default function Enquiry({ user }) {
       {!data && !error && <p role="status">Loading messages…</p>}
       {data && (
         <>
+          {data.enquiry.buyer && data.enquiry.seller && (
+            <BlockControl
+              target={
+                data.enquiry.buyer._id === user._id
+                  ? data.enquiry.seller._id
+                  : data.enquiry.buyer._id
+              }
+            />
+          )}
           <ol aria-label="Messages">
             {data.messages.map((item) => (
               <li key={item._id}>
@@ -70,6 +81,13 @@ export default function Enquiry({ user }) {
                       : data.enquiry.seller?.account.username || "Participant"}
                 </strong>
                 <p style={{ whiteSpace: "pre-wrap" }}>{item.text}</p>
+                {item.sender !== user._id && (
+                  <ReportControl
+                    targetType="message"
+                    target={item._id}
+                    label="Report message"
+                  />
+                )}
                 <time dateTime={item.createdAt}>
                   {new Date(item.createdAt).toLocaleString()}
                 </time>

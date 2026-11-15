@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Navigate, Link } from "react-router-dom";
 import { api, errorMessage } from "../api";
+import AvatarEditor from "../components/AvatarEditor";
 export default function Profile({ user, setUser }) {
   const [username, setUsername] = useState(user?.account.username || ""),
     [bio, setBio] = useState(user?.account.bio || "");
@@ -54,6 +55,8 @@ export default function Profile({ user, setUser }) {
       </form>
       {error && <p role="alert">{error}</p>}
       {saved && <p role="status">Profile saved.</p>}
+      <AvatarEditor user={user} setUser={setUser} />
+      <Link to="/blocked-users">Manage blocked users</Link>
       <Link to={"/seller/" + user._id}>View public profile</Link>
     </main>
   );

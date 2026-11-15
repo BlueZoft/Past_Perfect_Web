@@ -441,3 +441,188 @@ test("profile form saves public fields only", async () => {
   });
   expect(setUser).toHaveBeenCalled();
 });
+
+test("photo replacement sends the current version and all selected files", async () => {
+  const { default: ReplaceImages } =
+    await import("../components/ReplaceImages");
+  const onSaved = vi.fn();
+  const create = URL.createObjectURL,
+    revoke = URL.revokeObjectURL;
+  URL.createObjectURL = vi.fn(() => "blob:replacement");
+  URL.revokeObjectURL = vi.fn();
+  try {
+    api.put.mockResolvedValue({ data: { _id: "1", __v: 5, images: [] } });
+    renderRoute(
+      <ReplaceImages
+        listing={{ _id: "1", __v: 4, images: [] }}
+        onSaved={onSaved}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("Replacement photos"), {
+      target: {
+        files: [new File(["photo"], "image.png", { type: "image/png" })],
+      },
+    });
+    fireEvent.click(screen.getByText("Replace all photos"));
+    await screen.findByText("Photos replaced.");
+    expect(api.put.mock.calls[0][0]).toBe("/offer/1/images");
+    const form = api.put.mock.calls[0][1];
+    expect(form.get("version")).toBe("4");
+    expect(form.getAll("images")).toHaveLength(1);
+    expect(onSaved).toHaveBeenCalled();
+    cleanup();
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:replacement");
+  } finally {
+    URL.createObjectURL = create;
+    URL.revokeObjectURL = revoke;
+  }
+});
+
+test("avatar editor sends a private versioned upload and updates session user state", async () => {
+  const { default: AvatarEditor } = await import("../components/AvatarEditor");
+  const setUser = vi.fn();
+  const create = URL.createObjectURL,
+    revoke = URL.revokeObjectURL;
+  URL.createObjectURL = vi.fn(() => "blob:avatar");
+  URL.revokeObjectURL = vi.fn();
+  try {
+    api.put.mockResolvedValue({
+      data: {
+        _id: "u1",
+        account: { avatar: { url: "/uploads/new.png" } },
+        avatarVersion: 2,
+      },
+    });
+    renderRoute(
+      <AvatarEditor
+        user={{ _id: "u1", account: {}, avatarVersion: 1 }}
+        setUser={setUser}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("New avatar"), {
+      target: {
+        files: [new File(["photo"], "avatar.png", { type: "image/png" })],
+      },
+    });
+    fireEvent.click(screen.getByText("Save avatar"));
+    await waitFor(() => expect(setUser).toHaveBeenCalled());
+    expect(api.put.mock.calls[0][0]).toBe("/user/avatar");
+    expect(api.put.mock.calls[0][1].get("version")).toBe("1");
+    cleanup();
+  } finally {
+    URL.createObjectURL = create;
+    URL.revokeObjectURL = revoke;
+  }
+});
+
+test("report UI submits only the selected target and review details", async () => {
+  const { default: ReportControl } =
+    await import("../components/ReportControl");
+  api.post.mockResolvedValue({ data: { _id: "r1" } });
+  renderRoute(
+    <ReportControl targetType="listing" target="l1" label="Report listing" />,
+  );
+  fireEvent.click(screen.getByText("Report listing"));
+  fireEvent.change(screen.getByLabelText("Report reason"), {
+    target: { value: "scam" },
+  });
+  fireEvent.change(screen.getByLabelText("Report details"), {
+    target: { value: "Please review this item" },
+  });
+  fireEvent.click(screen.getByText("Submit report"));
+  await screen.findByText("Report received for review.");
+  expect(api.post).toHaveBeenCalledWith("/reports", {
+    targetType: "listing",
+    target: "l1",
+    reason: "scam",
+    details: "Please review this item",
+  });
+});
+
+test("block control can block and unblock without exposing another users block list", async () => {
+  const { default: BlockControl } = await import("../components/BlockControl");
+  api.get.mockResolvedValue({ data: { blocked: false } });
+  api.put.mockResolvedValue({});
+  api.delete.mockResolvedValue({});
+  renderRoute(<BlockControl target="u2" />);
+  await waitFor(() =>
+    expect(screen.getByText("Block user").disabled).toBe(false),
+  );
+  fireEvent.click(screen.getByText("Block user"));
+  await screen.findByText("Unblock user");
+  expect(api.put).toHaveBeenCalledWith("/user/blocks/u2");
+  fireEvent.click(screen.getByText("Unblock user"));
+  await screen.findByText("Block user");
+  expect(api.delete).toHaveBeenCalledWith("/user/blocks/u2");
+});
+
+test("ordinary users cannot load the moderation queue", async () => {
+  const { default: Moderation } = await import("../pages/Moderation");
+  renderRoute(<Moderation user={{ _id: "u1", isAdmin: false }} />);
+  await screen.findByText("Administrator access required");
+  expect(api.get).not.toHaveBeenCalled();
+});
+
+test("admin listing visibility and report resolution are explicit versioned decisions", async () => {
+  const { default: Moderation } = await import("../pages/Moderation");
+  api.get.mockImplementation((url) =>
+    Promise.resolve({
+      data:
+        url === "/admin/reports"
+          ? {
+              reports: [
+                {
+                  _id: "r1",
+                  targetType: "listing",
+                  target: "l1",
+                  reason: "scam",
+                  snapshot: "A listing",
+                  status: "open",
+                  __v: 2,
+                },
+              ],
+              count: 1,
+              page: 1,
+              limit: 10,
+            }
+          : {
+              _id: "l1",
+              title: "Book",
+              status: "active",
+              moderationHidden: false,
+              __v: 7,
+            },
+    }),
+  );
+  api.patch.mockResolvedValue({
+    data: {
+      _id: "l1",
+      title: "Book",
+      status: "active",
+      moderationHidden: true,
+      __v: 8,
+    },
+  });
+  renderRoute(<Moderation user={{ _id: "admin", isAdmin: true }} />);
+  await screen.findByText("Load current listing");
+  fireEvent.click(screen.getByText("Load current listing"));
+  await screen.findByText("Hide listing");
+  fireEvent.change(screen.getByLabelText("Moderation note"), {
+    target: { value: "Under investigation" },
+  });
+  fireEvent.click(screen.getByText("Hide listing"));
+  await screen.findByText("Restore visibility");
+  expect(api.patch).toHaveBeenCalledWith("/admin/offers/l1/moderation", {
+    hidden: true,
+    reason: "Under investigation",
+    version: 7,
+  });
+  fireEvent.click(screen.getByText("Resolve report"));
+  await waitFor(() =>
+    expect(api.patch).toHaveBeenCalledWith("/admin/reports/r1", {
+      status: "resolved",
+      resolution: "Under investigation",
+      version: 2,
+    }),
+  );
+});

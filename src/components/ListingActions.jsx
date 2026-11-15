@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, errorMessage } from "../api";
+import ReportControl from "./ReportControl";
 export default function ListingActions({ listing, user }) {
   const navigate = useNavigate();
   const [saved, setSaved] = useState(null),
@@ -61,6 +62,13 @@ export default function ListingActions({ listing, user }) {
     );
   return (
     <section aria-label="Listing actions">
+      {listing.owner?._id !== user._id && (
+        <ReportControl
+          targetType="listing"
+          target={listing._id}
+          label="Report listing"
+        />
+      )}
       <button disabled={busy || saved === null} onClick={favourite}>
         {saved ? "Remove favourite" : "Save to favourites"}
       </button>
