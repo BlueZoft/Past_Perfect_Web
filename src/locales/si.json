@@ -309,5 +309,12 @@
   "rejected": "ප්‍රතික්ෂේප කළ",
   "This listing conflicts with marketplace rules": "මෙම දැන්වීම වෙළඳපොළ නීති සමඟ නොගැළපේ",
   "Account suspended. Open account status to appeal.": "ගිණුම අත්හිටුවා ඇත. අභියාචනයට ගිණුම් තත්ත්වය විවෘත කරන්න.",
-  "Account changed. Reload before trying again.": "ගිණුම වෙනස් වී ඇත. නැවත උත්සාහ කිරීමට පෙර පූරණය කරන්න."
+  "Account changed. Reload before trying again.": "ගිණුම වෙනස් වී ඇත. නැවත උත්සාහ කිරීමට පෙර පූරණය කරන්න.",
+  "Category attributes": "කාණ්ඩයේ ගුණාංග",
+  "Skip to content": "අන්තර්ගතයට යන්න",
+  "Selected photos: {0}": "තෝරාගත් ඡායාරූප: {0}",
+  "Invalid category attributes": "කාණ්ඩයේ ගුණාංග වලංගු නැත",
+  "Unknown category attribute": "නොදන්නා කාණ්ඩ ගුණාංගයක්",
+  "Image is invalid, animated or too large": "ඡායාරූපය වලංගු නැත, සජීවීකරණය කර ඇත හෝ විශාල වැඩිය",
+  "Image processing is busy. Please try again.": "ඡායාරූප සැකසීම කාර්යබහුලයි. නැවත උත්සාහ කරන්න."
 }

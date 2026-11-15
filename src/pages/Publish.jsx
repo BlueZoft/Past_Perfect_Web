@@ -8,6 +8,7 @@ export default function Publish({ token }) {
   useI18n();
   const navigate = useNavigate();
   const [value, setValue] = useState({
+    attributes: {},
     category: "other",
     district: "",
     town: "",
@@ -68,7 +69,9 @@ export default function Publish({ token }) {
     setError("");
     try {
       const form = new FormData();
-      Object.entries(value).forEach(([key, item]) => form.append(key, item));
+      Object.entries(value).forEach(([key, item]) =>
+        form.append(key, key === "attributes" ? JSON.stringify(item) : item),
+      );
       pictures.forEach((item, index) =>
         form.append("picture" + (index + 1), item.file),
       );
@@ -85,10 +88,13 @@ export default function Publish({ token }) {
     <main className="container">
       <h1>{t("Sell an item")}</h1>
       <Link to="/policy">{t("Read marketplace rules before publishing")}</Link>
-      <form onSubmit={submit}>
+      <form onSubmit={submit} aria-busy={busy}>
         <ListingFields value={value} onChange={setValue} disabled={busy} />
         <fieldset disabled={busy}>
           <legend>{t("Photos")}</legend>
+          <p role="status" aria-live="polite">
+            {t("Selected photos: {0}", { 0: pictures.length })}
+          </p>
           <p>{t("Add 1\u20133 JPEG, PNG or WebP photos, up to 5 MB each.")}</p>
           {pictures.map((item, index) => (
             <div key={item.preview}>

@@ -18,6 +18,7 @@ export default function CatalogueFields({ value, onChange, filters = false }) {
               ...value,
               category: e.target.value,
               size: "",
+              attributes: {},
             })
           }
         >

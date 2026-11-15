@@ -1,0 +1,7 @@
+# Accessibility and mobile validation
+
+The application has a keyboard-visible skip link targeting a focusable content container. Route changes focus that container and reset scroll. Page/form landmarks, explicit field labels, native required/range constraints, focus-visible outlines and live status/error messages support keyboard and assistive technology use. File inputs remain native and image removal uses buttons. Touch controls target at least 44px height, forms adapt to narrow viewports, and reduced-motion preferences disable decorative transitions/animation.
+
+`CategoryAttributes` uses server catalogue metadata for labels, input types and bounds, clearing stale values on category changes. Read-only values are rendered as escaped text. Locale changes preserve state and update labels. The upload photo count is announced politely; previews are revoked when removed/unmounted. Server output is resized WebP, avoiding reliance on client compression.
+
+Run `npm test` and `npm run build`. Automated checks cover category-control behavior, plain-text rendering, focus movement and axe-core DOM rules on a representative listing form. Color contrast is excluded in jsdom because it lacks reliable layout/canvas. Passing this check is not a full accessibility audit. Before release, test keyboard-only paths, screen readers in all three languages, 200%/400% zoom, contrast, narrow devices and camera/gallery uploads in actual browsers. No device/visual audit is claimed by this release.

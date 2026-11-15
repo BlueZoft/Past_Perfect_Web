@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api, errorMessage, imageUrl } from "../api";
 import ListingActions from "../components/ListingActions";
+import CategoryAttributes from "../components/CategoryAttributes";
 export default function Offer({ user }) {
   useI18n();
   const { id } = useParams();
@@ -51,6 +52,7 @@ export default function Offer({ user }) {
             {t("LKR")} {data.price.toLocaleString(localeTag())}
           </h2>
           <p>{data.description}</p>
+          <CategoryAttributes readOnly value={data} />
           <p>
             {t("Condition:")} {t(data.condition)}
           </p>

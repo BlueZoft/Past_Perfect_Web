@@ -309,5 +309,12 @@
   "rejected": "rejected",
   "This listing conflicts with marketplace rules": "This listing conflicts with marketplace rules",
   "Account suspended. Open account status to appeal.": "Account suspended. Open account status to appeal.",
-  "Account changed. Reload before trying again.": "Account changed. Reload before trying again."
+  "Account changed. Reload before trying again.": "Account changed. Reload before trying again.",
+  "Category attributes": "Category attributes",
+  "Skip to content": "Skip to content",
+  "Selected photos: {0}": "Selected photos: {0}",
+  "Invalid category attributes": "Invalid category attributes",
+  "Unknown category attribute": "Unknown category attribute",
+  "Image is invalid, animated or too large": "Image is invalid, animated or too large",
+  "Image processing is busy. Please try again.": "Image processing is busy. Please try again."
 }

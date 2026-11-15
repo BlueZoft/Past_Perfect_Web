@@ -1,6 +1,7 @@
 import { t, errorText, useI18n } from "../i18n";
 import { conditions, sizes } from "../lib/listing";
 import CatalogueFields from "./CatalogueFields";
+import CategoryAttributes from "./CategoryAttributes";
 export default function ListingFields({ value, onChange, disabled = false }) {
   useI18n();
   const change = (event) =>
@@ -12,6 +13,7 @@ export default function ListingFields({ value, onChange, disabled = false }) {
     <fieldset disabled={disabled} className="listing-fields">
       <legend>{t("Listing details")}</legend>
       <CatalogueFields value={value} onChange={onChange} />
+      <CategoryAttributes value={value} onChange={onChange} />
       <label>
         {" "}
         {t("Title")}{" "}

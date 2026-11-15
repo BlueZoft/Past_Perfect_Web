@@ -136,6 +136,7 @@ test("public policy displays operator-provided notice and review rules", async (
 });
 
 test("application routes suspended sessions to account status instead of publishing", async () => {
+  vi.spyOn(window, "scrollTo").mockImplementation(() => {});
   const { default: App } = await import("../App");
   window.history.replaceState({}, "", "/publish");
   api.get.mockImplementation((url) =>

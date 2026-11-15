@@ -309,5 +309,12 @@
   "rejected": "நிராகரிக்கப்பட்டது",
   "This listing conflicts with marketplace rules": "இந்த விளம்பரம் சந்தை விதிகளுக்கு முரணானது",
   "Account suspended. Open account status to appeal.": "கணக்கு இடைநிறுத்தப்பட்டுள்ளது. மேல்முறையீட்டிற்கு கணக்கு நிலையைத் திறக்கவும்.",
-  "Account changed. Reload before trying again.": "கணக்கு மாறியுள்ளது. மீண்டும் முயற்சிக்கும் முன் புதுப்பிக்கவும்."
+  "Account changed. Reload before trying again.": "கணக்கு மாறியுள்ளது. மீண்டும் முயற்சிக்கும் முன் புதுப்பிக்கவும்.",
+  "Category attributes": "வகைப் பண்புகள்",
+  "Skip to content": "உள்ளடக்கத்திற்குச் செல்",
+  "Selected photos: {0}": "தேர்ந்தெடுத்த படங்கள்: {0}",
+  "Invalid category attributes": "வகைப் பண்புகள் செல்லுபடியாகாது",
+  "Unknown category attribute": "அறியப்படாத வகைப் பண்பு",
+  "Image is invalid, animated or too large": "படம் செல்லுபடியாகாது, அசைவூட்டப்பட்டது அல்லது மிகப் பெரியது",
+  "Image processing is busy. Please try again.": "படச் செயலாக்கம் மும்முரமாக உள்ளது. மீண்டும் முயற்சிக்கவும்."
 }
