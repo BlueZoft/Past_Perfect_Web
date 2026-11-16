@@ -29,6 +29,7 @@ export default function Header({ logo, token, setUser }) {
       {token?.suspended ? (
         <nav>
           <Link to="/account-status">{t("Account status")}</Link>
+          <Link to="/orders">{t("My orders")}</Link> {" · "}
           <NotificationLink />
           <button onClick={logout}>{t("Sign out")}</button>
         </nav>
@@ -49,6 +50,7 @@ export default function Header({ logo, token, setUser }) {
                   <Link to="/admin/moderation">{t("Moderation")}</Link> {" · "}
                 </>
               )}
+              <Link to="/orders">{t("My orders")}</Link> {" · "}
               <NotificationLink /> {" · "}
               <Link to="/profile">{t("My profile")}</Link> {" · "}
               <Link to="/favourites">{t("Favourites")}</Link> {" · "}

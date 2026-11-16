@@ -82,7 +82,10 @@ export default function Offer({ user }) {
             {t("Status:")} {t(data.status)}
           </p>
           <ListingActions listing={data} user={user} />
-          <p>{t("Online checkout is not available yet.")}</p>
+          {user && data.status === "active" && data.owner?._id !== user._id && (
+            <Link to={"/checkout/" + data._id}>{t("Review order")}</Link>
+          )}
+          <p>{t("Order totals are calculated by the server.")}</p>
         </section>
       </div>
     </main>

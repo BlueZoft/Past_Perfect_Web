@@ -1,4 +1,4 @@
-# PastPerfect Web — v2.6
+# PastPerfect Web — v2.7
 
 React frontend for a Sri Lankan used-item marketplace. This version repairs the prototype's account and listing flows and replaces Create React App with Vite and React 18.
 
@@ -49,3 +49,5 @@ Version 2.4 adds email verification/recovery pages, an unread notification indic
 Version 2.5 adds restricted suspended-account sessions, versioned suspension/restoration, user appeals with atomic admin decisions, and configurable prohibited-item rejection/review queues. Bundled policy rules are labelled placeholders; replace them before launch. See [release notes](docs/V2.md).
 
 Version 2.6 adds decoded/resized WebP uploads, conservative dry-run local orphan reconciliation, configurable typed category attributes, skip navigation/route focus, larger touch targets and responsive form/listing layouts. See [release notes](docs/V2.md).
+
+Version 2.7 adds quote review, buyer/seller order history, reservation cancellation, collection readiness/confirmation and order enquiries. Test payment controls appear only when the backend enables its development simulator. No card details or real money are collected. See the backend order guide and [release notes](docs/V2.md).

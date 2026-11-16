@@ -30,6 +30,9 @@ import AccountModeration from "./pages/AccountModeration";
 import Policy from "./pages/Policy";
 import PolicyReview from "./pages/PolicyReview";
 import RouteFocus from "./components/RouteFocus";
+import Checkout from "./pages/Checkout";
+import Orders from "./pages/Orders";
+import OrderDetail from "./pages/OrderDetail";
 export default function App() {
   useI18n();
   const [user, setUser] = useState(null),
@@ -52,6 +55,8 @@ export default function App() {
       <div id="main-content" tabIndex={-1}>
         {user?.suspended ? (
           <Routes>
+            <Route path="/orders" element={<Orders user={user} />} />
+            <Route path="/orders/:id" element={<OrderDetail user={user} />} />
             <Route
               path="/account-status"
               element={<AccountStatus user={user} setUser={setUser} />}
@@ -107,6 +112,9 @@ export default function App() {
               path="/notifications"
               element={<Notifications user={user} />}
             />
+            <Route path="/orders" element={<Orders user={user} />} />
+            <Route path="/orders/:id" element={<OrderDetail user={user} />} />
+            <Route path="/checkout/:id" element={<Checkout user={user} />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="*" element={<NotFound />} />
             <Route

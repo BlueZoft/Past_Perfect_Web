@@ -113,7 +113,8 @@ export default function MyListings({ user }) {
                   {t("LKR")} {item.price.toLocaleString(localeTag())} ·{" "}
                   {t(item.status)}
                 </p>
-                {!item.moderationHidden &&
+                {!item.orderLock &&
+                  !item.moderationHidden &&
                   ["active", "reserved"].includes(item.status) && (
                     <>
                       <Link to={"/my-listings/" + item._id + "/edit"}>
@@ -142,6 +143,9 @@ export default function MyListings({ user }) {
                       </button>{" "}
                     </>
                   )}
+                {item.orderLock && (
+                  <p>{t("This listing is locked by an active order.")}</p>
+                )}
                 {item.policyReview && <p>{t("Awaiting policy review")}</p>}
                 {item.moderationHidden && (
                   <p>
@@ -172,7 +176,10 @@ export default function MyListings({ user }) {
                     </button>
                   </div>
                 ) : (
-                  <button disabled={busy} onClick={() => setRemove(item._id)}>
+                  <button
+                    disabled={busy || item.orderLock}
+                    onClick={() => setRemove(item._id)}
+                  >
                     {" "}
                     {t("Remove listing")}{" "}
                   </button>

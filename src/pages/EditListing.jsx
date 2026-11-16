@@ -28,6 +28,10 @@ export default function EditListing({ user }) {
           setError("You cannot edit this listing");
           return;
         }
+        if (data.orderLock) {
+          setError("This listing is locked by an active order.");
+          return;
+        }
         if (
           data.moderationHidden ||
           !["active", "reserved"].includes(data.status)
