@@ -1,4 +1,4 @@
-# PastPerfect Web — v2.7
+# PastPerfect Web — v2.8
 
 React frontend for a Sri Lankan used-item marketplace. This version repairs the prototype's account and listing flows and replaces Create React App with Vite and React 18.
 
@@ -32,7 +32,7 @@ Build output is `dist/`. Production hosting must serve `index.html` for client r
 - Versioned listing photo replacement and profile avatar upload/removal.
 - Listing/user/message reporting, user blocking, and an admin-only moderation queue.
 - Local development images work without external credentials. Cloudinary is configured on the backend.
-- Payments are explicitly unavailable. No placeholder card collection, charges or buyer-protection promises.
+- Live payments are unavailable. An explicit development simulator supports orders and refunds without card collection, charges or buyer-protection promises.
 
 There is no automatic data migration from the old prototype. See the backend API contract for breaking changes. Signup omits avatar upload; profile photos are managed from My profile.
 
@@ -51,3 +51,5 @@ Version 2.5 adds restricted suspended-account sessions, versioned suspension/res
 Version 2.6 adds decoded/resized WebP uploads, conservative dry-run local orphan reconciliation, configurable typed category attributes, skip navigation/route focus, larger touch targets and responsive form/listing layouts. See [release notes](docs/V2.md).
 
 Version 2.7 adds quote review, buyer/seller order history, reservation cancellation, collection readiness/confirmation and order enquiries. Test payment controls appear only when the backend enables its development simulator. No card details or real money are collected. See the backend order guide and [release notes](docs/V2.md).
+
+Version 2.8 adds buyer order disputes, one seller response, seller-approved full simulated refunds, and an allowlisted administrator review queue. Decisions are versioned, retain a shared resolution, notify both participants and preserve private order history. Suspended participants retain these dispute controls. See [release notes](docs/V2.md) and the backend order guide for placeholder policy and live-payment limitations.

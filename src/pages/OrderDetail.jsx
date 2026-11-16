@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, Navigate, useParams, useNavigate } from "react-router-dom";
 import { api, errorMessage } from "../api";
 import { t, errorText, useI18n, localeTag } from "../i18n";
+import OrderDispute from "../components/OrderDispute";
 export default function OrderDetail({ user }) {
   useI18n();
   const { id } = useParams(),
@@ -31,12 +32,13 @@ export default function OrderDetail({ user }) {
       active = false;
     };
   }, [id, user, retry]);
-  async function action(value) {
+  async function action(value, input = {}) {
     setBusy(true);
     setError("");
     try {
       const { data } = await api.post("/orders/" + id + "/" + value, {
         version: order.revision,
+        ...input,
       });
       setOrder(data);
     } catch (err) {
@@ -141,6 +143,14 @@ export default function OrderDetail({ user }) {
               {t("Confirm collection")}
             </button>
           )}
+          <OrderDispute
+            key={order._id}
+            order={order}
+            user={user}
+            settings={settings}
+            busy={busy}
+            onAction={action}
+          />
           {!user.suspended && (
             <form onSubmit={contact}>
               <label>

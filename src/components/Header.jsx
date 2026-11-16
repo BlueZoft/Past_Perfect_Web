@@ -41,7 +41,11 @@ export default function Header({ logo, token, setUser }) {
             <>
               {token.isAdmin && (
                 <>
-                  <Link to="/admin/accounts">{t("Account moderation")}</Link>{" "}
+                  <Link to="/admin/order-disputes">{t("Order disputes")}</Link>{" "}
+                  {" · "}
+                  <Link to="/admin/accounts">
+                    {t("Account moderation")}
+                  </Link>{" "}
                   {" · "}
                   <Link to="/admin/policy">
                     {t("Policy review queue")}

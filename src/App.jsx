@@ -33,6 +33,7 @@ import RouteFocus from "./components/RouteFocus";
 import Checkout from "./pages/Checkout";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
+import OrderDisputes from "./pages/OrderDisputes";
 export default function App() {
   useI18n();
   const [user, setUser] = useState(null),
@@ -114,6 +115,14 @@ export default function App() {
             />
             <Route path="/orders" element={<Orders user={user} />} />
             <Route path="/orders/:id" element={<OrderDetail user={user} />} />
+            <Route
+              path="/admin/order-disputes"
+              element={<OrderDisputes user={user} />}
+            />
+            <Route
+              path="/admin/order-disputes/:id"
+              element={<OrderDisputes user={user} />}
+            />
             <Route path="/checkout/:id" element={<Checkout user={user} />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="*" element={<NotFound />} />
