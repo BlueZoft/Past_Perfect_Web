@@ -1,4 +1,4 @@
-# PastPerfect Web — v2.8
+# PastPerfect Web — v2.9
 
 React frontend for a Sri Lankan used-item marketplace. This version repairs the prototype's account and listing flows and replaces Create React App with Vite and React 18.
 
@@ -53,3 +53,5 @@ Version 2.6 adds decoded/resized WebP uploads, conservative dry-run local orphan
 Version 2.7 adds quote review, buyer/seller order history, reservation cancellation, collection readiness/confirmation and order enquiries. Test payment controls appear only when the backend enables its development simulator. No card details or real money are collected. See the backend order guide and [release notes](docs/V2.md).
 
 Version 2.8 adds buyer order disputes, one seller response, seller-approved full simulated refunds, and an allowlisted administrator review queue. Decisions are versioned, retain a shared resolution, notify both participants and preserve private order history. Suspended participants retain these dispute controls. See [release notes](docs/V2.md) and the backend order guide for placeholder policy and live-payment limitations.
+
+Version 2.9 adds indexed title/description keyword search, relevance sorting, condition/size filters, and private named saved searches with rename/delete controls. Legacy literal title search URLs still work. Saved searches reopen current public results; they do not send alerts. See [release notes](docs/V2.md) and the [search guide](https://github.com/BlueZoft/Past_Perfect_BackEnd/blob/master/docs/SEARCH.md) for index setup and limitations.

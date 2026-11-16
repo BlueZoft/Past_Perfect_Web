@@ -6,6 +6,7 @@ import "./App.css";
 import Header from "./components/Header";
 import Logo from "./assets/logo.svg";
 import Home from "./pages/Home";
+import SavedSearches from "./pages/SavedSearches";
 import Offer from "./pages/Offer";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
@@ -73,7 +74,7 @@ export default function App() {
           </Routes>
         ) : (
           <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Home user={user} />} />
             <Route path="/offer/:id" element={<Offer user={user} />} />
             <Route path="/login" element={<Login setUser={setUser} />} />
             <Route path="/signup" element={<SignUp setUser={setUser} />} />
@@ -87,6 +88,10 @@ export default function App() {
             <Route
               path="/profile"
               element={<Profile user={user} setUser={setUser} />}
+            />
+            <Route
+              path="/saved-searches"
+              element={<SavedSearches user={user} />}
             />
             <Route path="/favourites" element={<Favourites user={user} />} />
             <Route path="/enquiries" element={<Enquiries user={user} />} />

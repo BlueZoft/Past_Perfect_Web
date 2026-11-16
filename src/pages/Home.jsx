@@ -3,10 +3,15 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api, errorMessage, imageUrl } from "../api";
 import CatalogueFields from "../components/CatalogueFields";
-export default function Home() {
+import SaveSearch from "../components/SaveSearch";
+import { searchQuery } from "../search";
+export default function Home({ user }) {
   useI18n();
   const [params, setParams] = useSearchParams();
   const query = params.toString();
+  const searchKey = params.has("title") ? "title" : "q";
+  const keywords = !!params.get("q")?.trim();
+  const savedQuery = searchQuery(params);
   const [data, setData] = useState(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(true),
@@ -37,7 +42,13 @@ export default function Home() {
   }, [query, retry]);
   const change = (key, value) => {
     const next = new URLSearchParams(params);
-    value ? next.set(key, value) : next.delete(key);
+    value || key === "title" ? next.set(key, value) : next.delete(key);
+    if (
+      ["q", "title"].includes(key) &&
+      !value.trim() &&
+      next.get("sort") === "relevance"
+    )
+      next.delete("sort");
     next.set("page", "1");
     setParams(next);
   };
@@ -57,17 +68,42 @@ export default function Home() {
             for (const key of ["category", "district", "town"]) {
               value[key] ? next.set(key, value[key]) : next.delete(key);
             }
+            if (value.category && value.category !== "clothing")
+              next.delete("size");
             next.set("page", "1");
             setParams(next);
           }}
         />
         <label>
+          {t("Search in")}
+          <select
+            value={searchKey}
+            onChange={(event) => {
+              const next = new URLSearchParams(params),
+                value = params.get(searchKey) || "";
+              next.delete("q");
+              next.delete("title");
+              next.set(event.target.value, value);
+              if (
+                event.target.value === "title" &&
+                next.get("sort") === "relevance"
+              )
+                next.delete("sort");
+              next.set("page", "1");
+              setParams(next);
+            }}
+          >
+            <option value="q">{t("Titles and descriptions")}</option>
+            <option value="title">{t("Title contains")}</option>
+          </select>
+        </label>
+        <label>
           {" "}
           {t("Search")}{" "}
           <input
-            value={params.get("title") || ""}
+            value={params.get(searchKey) || ""}
             maxLength={120}
-            onChange={(e) => change("title", e.target.value)}
+            onChange={(e) => change(searchKey, e.target.value)}
           />
         </label>
         <label>
@@ -91,18 +127,66 @@ export default function Home() {
           />
         </label>
         <label>
+          {t("Condition")}
+          <select
+            value={params.get("condition") || ""}
+            onChange={(event) => change("condition", event.target.value)}
+          >
+            <option value="">{t("All conditions")}</option>
+            {["New with Tags", "Like New", "Fairly Used", "Used", "Worn"].map(
+              (value) => (
+                <option key={value} value={value}>
+                  {t(value)}
+                </option>
+              ),
+            )}
+          </select>
+        </label>
+        <label>
+          {t("Size")}
+          <select
+            disabled={
+              !!params.get("category") && params.get("category") !== "clothing"
+            }
+            value={params.get("size") || ""}
+            onChange={(event) => change("size", event.target.value)}
+          >
+            <option value="">{t("All sizes")}</option>
+            {["XS", "S", "M", "L", "XL", "XXL"].map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
           {" "}
           {t("Sort")}{" "}
           <select
-            value={params.get("sort") || "newest"}
+            value={params.get("sort") || (keywords ? "relevance" : "newest")}
             onChange={(e) => change("sort", e.target.value)}
           >
+            {keywords && (
+              <option value="relevance">{t("Most relevant")}</option>
+            )}
             <option value="newest">{t("Newest")}</option>
             <option value="price-asc">{t("Price: low to high")}</option>
             <option value="price-desc">{t("Price: high to low")}</option>
           </select>
         </label>
       </section>
+      <p>
+        {t(
+          "Keyword search matches words. Use Title contains for partial text.",
+        )}
+      </p>
+      {user && !user.suspended && (
+        <SaveSearch
+          key={JSON.stringify(savedQuery)}
+          query={savedQuery}
+          disabled={busy || !!error}
+        />
+      )}
       {busy ? (
         <p role="status">{t("Loading listings\u2026")}</p>
       ) : error ? (

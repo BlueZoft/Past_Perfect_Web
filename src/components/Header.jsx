@@ -57,6 +57,7 @@ export default function Header({ logo, token, setUser }) {
               <Link to="/orders">{t("My orders")}</Link> {" · "}
               <NotificationLink /> {" · "}
               <Link to="/profile">{t("My profile")}</Link> {" · "}
+              <Link to="/saved-searches">{t("Saved searches")}</Link> {" · "}
               <Link to="/favourites">{t("Favourites")}</Link> {" · "}
               <Link to="/enquiries">{t("Enquiries")}</Link> {" · "}
               <Link to="/my-listings">{t("My listings")}</Link> {" · "}
