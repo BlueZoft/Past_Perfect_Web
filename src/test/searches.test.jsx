@@ -113,6 +113,7 @@ test("save captures only supported filters, omits pagination and preserves them 
   await screen.findByText("Search saved.");
   expect(api.post).toHaveBeenLastCalledWith("/user/saved-searches", {
     name: "Affordable books",
+    alertsEnabled: false,
     query: {
       q: "book",
       condition: "Used",
@@ -147,7 +148,11 @@ test("saved search links restore filters without pagination or arbitrary redirec
   expect(
     searchUrl({ q: "book", url: "https://example.invalid", page: "10" }),
   ).toBe("/?q=book");
-  expect(screen.getByText("Saved searches do not send alerts.")).toBeTruthy();
+  expect(
+    screen.getByText(
+      "Enable in-app alerts for new matching listings. Existing listings are not backfilled.",
+    ),
+  ).toBeTruthy();
 });
 test("rename and removal submit current saved-search revisions", async () => {
   api.get.mockResolvedValue({

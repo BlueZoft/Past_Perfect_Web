@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, Navigate, useParams, useNavigate } from "react-router-dom";
 import { api, errorMessage } from "../api";
 import { t, errorText, useI18n, localeTag } from "../i18n";
+import OrderReview from "../components/OrderReview";
 import OrderDispute from "../components/OrderDispute";
 export default function OrderDetail({ user }) {
   useI18n();
@@ -143,6 +144,13 @@ export default function OrderDetail({ user }) {
               {t("Confirm collection")}
             </button>
           )}
+          <OrderReview
+            key={order._id + ":review"}
+            order={order}
+            user={user}
+            busy={busy}
+            onAction={action}
+          />
           <OrderDispute
             key={order._id}
             order={order}

@@ -41,7 +41,11 @@ export default function Header({ logo, token, setUser }) {
             <>
               {token.isAdmin && (
                 <>
-                  <Link to="/admin/order-disputes">{t("Order disputes")}</Link>{" "}
+                  <Link to="/admin/reviews">{t("Review moderation")}</Link>{" "}
+                  {" · "}
+                  <Link to="/admin/order-disputes">
+                    {t("Order disputes")}
+                  </Link>{" "}
                   {" · "}
                   <Link to="/admin/accounts">
                     {t("Account moderation")}
@@ -54,6 +58,7 @@ export default function Header({ logo, token, setUser }) {
                   <Link to="/admin/moderation">{t("Moderation")}</Link> {" · "}
                 </>
               )}
+              <Link to="/analytics">{t("Seller analytics")}</Link> {" · "}
               <Link to="/orders">{t("My orders")}</Link> {" · "}
               <NotificationLink /> {" · "}
               <Link to="/profile">{t("My profile")}</Link> {" · "}

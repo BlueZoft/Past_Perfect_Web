@@ -4,6 +4,7 @@ import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { api, errorMessage } from "../api";
 import Pagination from "../components/Pagination";
 const titles = {
+  search: "New listing matching a saved search",
   order: "Order status update",
   account: "Account status update",
   message: "New enquiry message",

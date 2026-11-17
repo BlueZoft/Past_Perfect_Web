@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { api, errorMessage, imageUrl } from "../api";
 import CatalogueFields from "../components/CatalogueFields";
+import AttributeFilters from "../components/AttributeFilters";
 import SaveSearch from "../components/SaveSearch";
 import { searchQuery } from "../search";
 export default function Home({ user }) {
@@ -68,6 +69,8 @@ export default function Home({ user }) {
             for (const key of ["category", "district", "town"]) {
               value[key] ? next.set(key, value[key]) : next.delete(key);
             }
+            if (value.category !== (params.get("category") || ""))
+              next.delete("attributeFilters");
             if (value.category && value.category !== "clothing")
               next.delete("size");
             next.set("page", "1");
@@ -175,6 +178,11 @@ export default function Home({ user }) {
           </select>
         </label>
       </section>
+      <AttributeFilters
+        category={params.get("category")}
+        raw={params.get("attributeFilters")}
+        onChange={(value) => change("attributeFilters", value)}
+      />
       <p>
         {t(
           "Keyword search matches words. Use Title contains for partial text.",

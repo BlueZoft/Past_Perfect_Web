@@ -3,7 +3,7 @@ import { Link, Navigate } from "react-router-dom";
 import { api, errorMessage } from "../api";
 import { t, errorText, useI18n } from "../i18n";
 import { searchUrl } from "../search";
-function Search({ item, busy, onRename, onRemove }) {
+function Search({ item, busy, onRename, onRemove, onAlerts }) {
   const [name, setName] = useState(item.name);
   return (
     <article>
@@ -28,6 +28,15 @@ function Search({ item, busy, onRename, onRemove }) {
           {t("Rename search")}
         </button>
       </form>
+      <label>
+        <input
+          type="checkbox"
+          disabled={busy}
+          checked={!!item.alertsEnabled}
+          onChange={(event) => onAlerts(item, event.target.checked)}
+        />
+        {t("New listing alerts")}
+      </label>
       <button disabled={busy} onClick={() => onRemove(item)}>
         {t("Delete saved search")}
       </button>
@@ -57,6 +66,26 @@ export default function SavedSearches({ user }) {
       active = false;
     };
   }, [user, retry]);
+  async function alerts(item, alertsEnabled) {
+    setBusy(true);
+    setError("");
+    try {
+      const { data: updated } = await api.patch(
+        "/user/saved-searches/" + item._id,
+        { alertsEnabled, version: item.revision },
+      );
+      setData((current) => ({
+        ...current,
+        searches: current.searches.map((record) =>
+          record._id === item._id ? updated : record,
+        ),
+      }));
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  }
   async function rename(item, name) {
     setBusy(true);
     setError("");
@@ -105,7 +134,11 @@ export default function SavedSearches({ user }) {
           "Save up to 25 searches. Running a search shows current available listings.",
         )}
       </p>
-      <p>{t("Saved searches do not send alerts.")}</p>
+      <p>
+        {t(
+          "Enable in-app alerts for new matching listings. Existing listings are not backfilled.",
+        )}
+      </p>
       <Link to="/">{t("Browse items")}</Link>
       <button disabled={busy} onClick={() => setRetry((value) => value + 1)}>
         {t("Refresh saved searches")}
@@ -122,6 +155,7 @@ export default function SavedSearches({ user }) {
               busy={busy}
               onRename={rename}
               onRemove={remove}
+              onAlerts={alerts}
             />
           ))}
         </>

@@ -4,6 +4,7 @@ import { api, errorMessage } from "../api";
 import { t, errorText } from "../i18n";
 export default function SaveSearch({ query, disabled }) {
   const [name, setName] = useState(""),
+    [alertsEnabled, setAlertsEnabled] = useState(false),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [saved, setSaved] = useState(false);
@@ -14,7 +15,7 @@ export default function SaveSearch({ query, disabled }) {
     setError("");
     setSaved(false);
     try {
-      await api.post("/user/saved-searches", { name, query });
+      await api.post("/user/saved-searches", { name, query, alertsEnabled });
       setSaved(true);
     } catch (err) {
       setError(errorMessage(err));
@@ -33,6 +34,14 @@ export default function SaveSearch({ query, disabled }) {
             value={name}
             onChange={(event) => setName(event.target.value)}
           />
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={alertsEnabled}
+            onChange={(event) => setAlertsEnabled(event.target.checked)}
+          />
+          {t("New listing alerts")}
         </label>
         <button disabled={disabled || busy || saved || !name.trim()}>
           {t("Save this search")}

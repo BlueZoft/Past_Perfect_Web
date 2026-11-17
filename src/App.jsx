@@ -5,6 +5,8 @@ import { api } from "./api";
 import "./App.css";
 import Header from "./components/Header";
 import Logo from "./assets/logo.svg";
+import SellerAnalytics from "./pages/SellerAnalytics";
+import ReviewModeration from "./pages/ReviewModeration";
 import Home from "./pages/Home";
 import SavedSearches from "./pages/SavedSearches";
 import Offer from "./pages/Offer";
@@ -75,6 +77,14 @@ export default function App() {
         ) : (
           <Routes>
             <Route path="/" element={<Home user={user} />} />
+            <Route
+              path="/analytics"
+              element={<SellerAnalytics user={user} />}
+            />
+            <Route
+              path="/admin/reviews"
+              element={<ReviewModeration user={user} />}
+            />
             <Route path="/offer/:id" element={<Offer user={user} />} />
             <Route path="/login" element={<Login setUser={setUser} />} />
             <Route path="/signup" element={<SignUp setUser={setUser} />} />

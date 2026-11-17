@@ -9,6 +9,7 @@ export const searchKeys = [
   "priceMin",
   "priceMax",
   "sort",
+  "attributeFilters",
 ];
 export function searchQuery(params) {
   return Object.fromEntries(

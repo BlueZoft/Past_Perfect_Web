@@ -2,6 +2,7 @@ import { t, errorText, useI18n } from "../i18n";
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { api, errorMessage } from "../api";
+import SellerReviews from "../components/SellerReviews";
 import OfferCards from "../components/OfferCards";
 import Pagination from "../components/Pagination";
 import BlockControl from "../components/BlockControl";
@@ -64,6 +65,7 @@ export default function Seller({ user }) {
         </>
       )}
       {data.seller.emailVerified && <p>{t("Email verified")}</p>}
+      <SellerReviews key={id} id={id} />
       <h2>{t("Active listings")}</h2>
       {!data.offers.length && <p>{t("No active listings.")}</p>}
       <OfferCards offers={data.offers} />
