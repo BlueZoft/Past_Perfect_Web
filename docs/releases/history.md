@@ -1,0 +1,167 @@
+# Version 2 notes
+
+Sections below are release history. v3.0 is the current behavior; later sections supersede earlier limitations.
+
+## Architecture
+
+`src/api.js` owns credentialed requests, API configuration and error messages. `App.jsx` restores the user through `/user/me`; tokens are never persisted in JavaScript storage. Feature pages handle accounts, URL-backed discovery, details and publishing. JSX uses `.jsx` files and Vite's automatic React transform.
+
+The old `REACT_APP_API_URL` setting is replaced by `VITE_API_URL`. React 18 and Vite replace the incompatible React 17/CRA entry point. Both npm lockfiles must be committed with their manifests; use `npm ci` thereafter.
+
+## Configuration placeholders
+
+`.env.example` contains the working local API URL, not a deployed service. Replace it with the deployed API URL when hosting. Actual hosting names, Cloudinary account credentials, payment provider, shipping prices, support contacts and policies are intentionally unspecified. Never put private keys in frontend environment variables.
+
+There are no hardcoded payment keys or fictional shipping/protection fees. The payment page is informational and safe on direct navigation. A future checkout must fetch a server-priced order by ID rather than trust router state.
+
+## Original v2.0 scope and follow-up
+
+The UI and existing styles are retained where useful; this is not a complete visual redesign or multilingual translation. Unicode listing input works, but translated interface copy remains planned. Image previews are revoked when removed or unmounted. Listings have server-enforced file and price limits.
+
+Test coverage includes URL query forwarding/page changes, network recovery, listing field rendering, login network errors, signup submission and direct payment navigation. Backend integration tests cover authentication, cookies, CSRF origin checks, uploads and database discovery.
+
+
+## v2.1 — Seller listing management
+
+Added `/my-listings` and `/my-listings/:id/edit` in the frontend, backed by owner-scoped API operations. Sellers can edit title, description, whole-LKR price, condition and optional size while keeping existing photos. Publishing and editing share a labeled, accessible details form and validation helpers. Publishing error handling no longer shadows the API error formatter.
+
+Allowed transitions: active → reserved or sold; reserved → active or sold; active/reserved/sold → removed through DELETE. Sold listings cannot be edited or reactivated. Removal is a confirmed soft delete: it disappears from public details, discovery and seller results. Reserved/sold listings remain accessible by direct detail URL, labeled with their status; only active listings appear in discovery. Reservations are seller-managed availability labels, not buyer-specific reservations or inventory locks for checkout.
+
+Every mutation requires the current `__v` from the listing response, sent as `version`. Atomic updates increment it, returning 409 for stale updates. Owners are determined from the server session, never request fields. Another account receives 404 on mutation attempts. Seller pagination is bounded and scoped to the authenticated owner. Editing cannot change ownership, currency, images or status through the text update endpoint.
+
+Limitations: photo replacement, restoration of removed listings, and a retention/purge job are not implemented. Removal retains the record and existing assets; an already-known image URL can still resolve. This feature must not be presented as permanent erasure. No schema migration or development-data reset is performed. Gateway, delivery, moderation and verification settings remain future work; no real-world configuration was invented.
+
+Validation adds cross-account authorization checks, concurrent-write protection, transitions, removed-listing visibility, frontend removal confirmation, edit payload/version forwarding, anonymous redirects and upload error recovery. Hosted CI is configured but has not been run from this workspace.
+
+
+## v2.2 — Discovery and buyer/seller interaction
+
+- Configurable categories plus district/town selectors in publishing, editing and shareable browsing filters. Clothing size is the first typed category-specific attribute; it is rejected for non-clothing items. Additional category attribute schemas remain planned.
+- Public seller pages show username, bio and active listings without exposing email, password/session information or private enquiries. Owners edit their own username and bio through My profile.
+- Private favourites are idempotent and paginated. Reserved/sold items remain saved with their status; removed items are excluded from results and totals. Saving is not an item reservation.
+- Buyers can enquire about active listings and continue conversations from their inbox. One thread exists per buyer/listing; subsequent enquiries append messages. Only the buyer and listing owner can read/reply. Contacting your own listing is rejected. Messages are limited to 2000 characters and message writes are rate-limited. Plain text is rendered without HTML interpretation.
+- Existing conversations remain available after a listing is sold/removed; they retain the title from thread creation for context. A title snapshot is not a current offer, order or price agreement.
+
+External configuration: bundled geography contains only `sample-district` / `Example district (placeholder)` / `Example town`. Replace the backend JSON catalogue or set `CATALOGUE_FILE`; restart the API. No current district list, service credentials or commercial policies have been invented. The frontend loads options from `/catalogue`; frontend environment variables remain public-only.
+
+Limitations: messages require manual refresh (no WebSocket/push/email delivery), no read receipts, attachments, blocking/reporting or admin moderation yet. Thread creation/message writing are separate database operations; a failed request may leave an empty thread or a sent message whose response was lost. Refresh before retrying; idempotent message-send keys are a follow-up. In-memory rate limits require shared storage for multi-instance deployment. Do not launch publicly until moderation/abuse handling and production configuration are complete. No payments are enabled.
+
+Validation includes three-account privacy tests, favourite idempotency under concurrent saves, hidden removed items, literal/validated filters, profile-field allowlists, enquiry ownership, bounded/paginated messages, safe text rendering and UI request payloads. Hosted CI execution is not claimed.
+
+
+## v2.3 — Media and trust controls
+
+Listing owners can replace all photos of an active/reserved, non-hidden listing in one version-checked request. Submit 1–3 images in the desired display order. Old images stay attached until the update succeeds; stale/failed updates clean up newly saved images. Profile avatars have a separate `avatarVersion`, require the same signature/size checks, and can be removed. Private session responses now include `avatarVersion` and `isAdmin`.
+
+Retired media goes through a persistent cleanup queue. Old assets are queued before references are detached; deletion checks both listing and avatar references. Failed provider deletions remain retryable. A maintenance command previews expired removed-listing media by default; `--apply` explicitly detaches it and drains pending jobs. This is media retention, not account/message/report erasure. No scheduled production worker is installed automatically.
+
+Users can report visible listings, public seller profiles and received messages. Reporting a message requires membership of its conversation. Reports preserve only the reported content snapshot and supplied reason/details. Duplicate reports from the same user for the same target return the existing report. Blocking prevents new enquiries and replies in both directions while preserving conversation history and public browsing. Unblocking is available from profile settings; the other account's block list is never exposed.
+
+Administrators are selected only through the operator's `ADMIN_USER_IDS` allowlist; there is no public role-edit endpoint or default administrator. The moderation queue supports versioned report resolution/dismissal with notes and independent hide/restore decisions for listings. Hidden listings disappear from public details, discovery, seller listings and favourites; owners can see the hidden status and remove the item but cannot edit/reactivate it. Visibility decisions increment the listing version and retain the last 100 audit entries, excluded from public responses. Resolving a report does not automatically hide/restore its target. Reports about users/messages can be reviewed, but account suspension and message deletion are not implemented.
+
+Production limitations: configure actual admins, moderation/prohibited-item policies and retention policy before launch. The example retention of 30 days is a starter placeholder, not a legal/business recommendation. Hiding/removing a listing does not immediately revoke cached or already-known image URLs. A process crash between saving a new image and persisting its reference can orphan that new asset; provider reconciliation is still required. Cleanup queue persistence failures are logged without changing an already-successful response. Jobs process bounded batches. Rate limits remain process-local. Full audit archival, admin MFA, appeals, user bans, report notifications, verification/recovery and payments remain future work.
+
+Regression coverage includes cross-account media access, stale replacements, invalid image contents, avatar version checks, provider cleanup retries, reference protection, bidirectional blocking, report target validation, private message reporting, role escalation rejection, hide/restore visibility, hidden-owner restrictions, stale report decisions, dry-run/apply retention, UI payloads and administrator access gating. Local integrations are verified; live Cloudinary deletion and hosted CI are not claimed.
+
+
+## v2.4 — Verification, recovery, translations and notifications
+
+Email verification and password recovery are complete application flows. Signup attempts verification delivery when a mail driver is configured; My profile can resend and refresh the badge. Recovery uses a generic account-existence response. Both token types contain 32 random bytes, persist only SHA-256 digests, expire after 30 minutes, are replaced on resend and are consumed atomically once. Password reset increments an authentication version checked on every request, invalidating pre-reset sessions even if physical session cleanup fails. Verification confirms control of an email address, not identity; it does not currently gate marketplace access.
+
+Email links place tokens in URL fragments. The frontend captures and removes the fragment, requires an explicit button action, and never automatically consumes links on a GET. Authenticated/private account responses use no-store caching, tokens are excluded from normal user queries/responses, and the frontend requests no-referrer behavior. Passwords retain the bcrypt 8-character/72-byte limits. Recovery/account endpoints have per-route IP limits of 10 attempts per 15 minutes. Generic recovery responses have a minimum response duration; SMTP/network timing is not guaranteed identical across cases.
+
+Email delivery is configurable: disabled if not configured, a private filesystem outbox for local development, or authenticated SMTP over TLS for production. Local mail is rejected in production and cannot be written inside the public upload directory. Actual SMTP host, credentials and sender remain placeholders. TLS verification is never disabled. Local outbox integration and translated templates were tested; live SMTP delivery requires the operator's real configuration and is not claimed.
+
+The frontend includes English, Sinhala and Tamil dictionaries for application navigation, forms, filters, status labels, moderation, account flows and notifications. Language choice persists and updates the document language, dates and numeric formatting. Canonical API identifiers are never translated; changing language preserves form state. User-authored titles, descriptions, bios, message text, moderation notes and operator-provided custom catalogue content are not translated automatically. Unmapped API failures use a localized generic error in Sinhala/Tamil. Public seller pages expose an email-verified badge without token data.
+
+In-app notifications cover received enquiry messages, listing visibility decisions, report review and email verification. They contain no message body/token/private resolution note. Each notification is recipient-scoped, persisted and event-deduplicated, with paginated history, unread counts, single-read and mark-all-read actions. The header polls every 30 seconds and on focus; the inbox supports manual refresh. Report notifications open My reports, which shows only the reporter's target type/reason/status, not moderator-private notes. Message notifications open their participant-only conversation.
+
+Limitations: this is in-app notification delivery, not Web Push, SMS, realtime sockets or general email marketing. Notification writes follow the primary operation and failures are logged; a transactional outbox/reconciliation service for guaranteed event delivery remains a production reliability enhancement. SMTP outages after signup do not undo the account; resend after configuration/service recovery. Recovery delivery failures retain the generic response to avoid account enumeration. Local token-bearing email files must remain private and ignored by Git. No external emails were sent during validation. Managed payments remain disabled.
+
+Tests exercise token hashing, expiry/reuse, recovery resends, concurrent consumption, old-session rejection, local file permissions, localized emails, recipient-only notifications, read state, report status privacy, dictionary coverage, live language switching, stable API enum values, fragment removal and explicit confirmation.
+
+
+## v2.5 — Account enforcement, appeals and policy review
+
+Administrators can suspend/restore non-admin accounts through a versioned operation with a reason visible to the account holder. Self/allowlisted-admin suspension is rejected to prevent administrative lockout. Each decision increments the account's moderation and authentication versions, invalidating prior sessions. Fresh logins remain possible so a suspended user can view status, appeals, notifications and log out; other authenticated features are denied by server middleware. The frontend displays a restricted route set for suspended accounts. Password recovery does not lift suspension.
+
+Suspended sellers' listings are excluded from public discovery totals, detail pages, seller profiles, favourites and new enquiries. Public listing pagination now joins against eligible sellers before counting/paginating rather than filtering a fetched page. Messages to suspended recipients are rejected. Existing records, images and conversation history are retained; suspension is not deletion or image-URL revocation.
+
+A user may submit one appeal per suspension version, with up to 100 appeal records retained on their account. Submission is idempotent for that version. Appeals and their decisions live on the user document so acceptance restores the account and closes the appeal in one atomic write. Rejecting an appeal keeps the account suspended; stale or repeated decisions return 409. Manual restoration accepts any open appeal for the current version. The account holder can read their own explanation/status/resolution; public profiles and other users cannot. Admin decision notes in this workflow are shown to the account holder. Audit history retains the last 100 decisions and is excluded from public responses.
+
+A public policy page uses `config/policy.json` or `POLICY_FILE`. Default rules are explicitly illustrative: `example-prohibited-item` is rejected; `example-review-item` is held for manual review. These are not researched legal categories. Title/description matching uses bounded, literal, case-insensitive NFKC-normalized terms, never operator-supplied regular expressions. Publishing/editing evaluates the policy; review matches are hidden and appear in an admin queue. A versioned administrator hide/restore decision clears the policy queue flag, either retaining the hidden listing or approving visibility. Editing approved text re-evaluates current rules. Uploading photos alone does not scan image contents for prohibited goods.
+
+Configuration changes require an API restart and apply to new/edited text; no retroactive bulk takedown or automatic existing-data migration is performed. Matching is a configurable triage mechanism, not a legal determination or abuse classifier. Operators must replace placeholder rules, decide actual policy/support practices and archive audits as required. Appeals from repeated suspensions are bounded; a separate operational process is required beyond that limit. Administrator MFA, indefinite audit storage and further escalation tools remain future work.
+
+Tests verify revocation/restricted sessions, public visibility/counts, cross-account appeal isolation, duplicate submissions/decisions, atomic restoration, upheld suspensions, stale decisions and policy review/approval. UI controls, request versions and new labels are covered in English/Sinhala/Tamil dictionaries. Production policy content remains unconfigured.
+
+
+## v2.6 — Media processing, typed attributes and accessible mobile foundations
+
+JPEG/PNG/WebP uploads now require successful decoding, reject animation and excessive dimensions, auto-rotate and re-encode to WebP at quality 80 with metadata removed. Listing output fits within 1920×1920 and avatars within 512×512, with no enlargement. Inputs remain limited to 5 MB, 20 million pixels and 10,000px per dimension. Sharp/libvips concurrency is 2, cache memory is 32 MB, and at most 2 save operations run per API process; additional processing requests receive 429. Output includes width/height/bytes/driver. The same sanitized bytes are used for local and Cloudinary storage. This is image decoding/sanitization, not malware or prohibited-content scanning.
+
+A new local orphan command previews generated UUID-named image files older than a configured grace period, excludes symlinks/unrelated names and checks both listing and avatar references. Applying queues candidates and rechecks references during deletion. Enumeration uses bounded memory; at most 1000 candidate files are reference-checked per batch, with a continuation cursor. Default grace is an illustrative 24 hours and no automatic scheduled deletion is installed. This addresses local crash-orphan reconciliation; remote provider enumeration and production scheduling still require operator work.
+
+The catalogue defines optional typed attributes by category, with localized labels. Starter fields include electronics brand/model, furniture width/height in centimetres, books author/ISBN and clothing brand. Text, bounded numbers and enum types are supported. Unknown keys, cross-category fields, nested values and invalid ranges are rejected; typed numeric values persist as numbers. Multipart attributes are encoded as JSON, while normal JSON edits accept an object. Category changes clear stale fields. Listing details display known attributes as plain text. Existing records are not bulk-migrated.
+
+The frontend adds a skip-to-content link, programmatic focus after route changes, explicit focus-visible outlines, minimum touch targets, smaller-screen form/listing layouts, reduced-motion handling, and live selected-photo counts. Login/signup/not-found pages use main landmarks. Category input controls are generated from the same metadata as backend validation and preserve canonical values across language switches. User image previews remain revocable; server-side resizing reduces served payload dimensions without trusting client-supplied metadata.
+
+Validation covers re-encoding, EXIF removal/rotation, corrupt/over-limit image rejection, avatar bounds, safe orphan dry-run/apply behavior, reference/symlink protection, multipart attribute persistence, category/type validation, dynamic controls and route focus. An axe-core DOM audit passes for a representative listing form with color-contrast disabled because jsdom has no reliable visual layout. This is not a full WCAG certification: real-device zoom/contrast, screen-reader and browser testing remain necessary. Live Cloudinary processing/deletion is not claimed.
+
+
+## v2.7 — Atomic orders and reservations (development payment simulation)
+
+Verified-email buyers can review a server-calculated quote and reserve another active seller's item when development test checkout is explicitly enabled. Amounts are immutable integer LKR minor units: current listing price × 100, configured platform fee, and zero delivery fee for collection-only fulfilment. Browser amounts are never used as a charging source. The request supplies an expected total and listing version only to detect a changed quote. No protection fee, carrier, legal policy or provider credentials are invented.
+
+The canonical order ledger and active reservation are embedded in the listing document. Creation atomically checks listing version/availability, changes it to reserved, locks seller edits/removal, and appends the order snapshot. This avoids requiring replica-set transactions in the existing standalone MongoDB environment. A unique partial compound index on embedded buyer/request-key pairs prevents cross-listing key reuse. Same-request retries return the existing order; changed requests conflict. History is bounded at 100 orders per listing and is never silently pruned. A future high-volume ledger migration requires an explicit design/migration.
+
+Reservations expire after the configured hold duration (starter default 15 minutes). Quotes/order reads can reconcile expiry, and API startup schedules bounded sweeps at startup and every minute; `npm run orders:expire` also processes up to 100 expired holds. Cancellation is available to either participant only before payment. Expiry, cancellation and simulated payment failure release only their own reservation atomically. Late/stale actions return 409 and cannot unlock a newer buyer's hold. Successful simulation removes the reservation deadline, marks the listing sold and keeps it locked until collection completion. Seller marks ready; buyer confirms collection. Cancellation of confirmed orders, refunds, shipping and disputes are not implemented.
+
+The payment mode defaults to disabled. `PAYMENT_DRIVER=test` works only outside production and is labelled everywhere as a simulation: no real money moves and no card/bank data is collected. Only the buyer can simulate success/failure for an unexpired order. The test endpoint uses stored totals and accepts only the order revision, not amount/card fields. The old `/payment` route remains disabled. There is no real provider, public payment webhook, escrow or payout integration in this release. A real provider must verify signatures, reconcile immutable amounts/currency/reference IDs and handle duplicate/late events/refunds before live charging can be enabled; configuration alone cannot turn this simulator into real payments.
+
+Order reads/actions/history are participant-only and private/no-store. Order records/reservation IDs are excluded from public listing/detail/seller/favourite responses. A public boolean lock only signals availability. Suspended participants may read their order history/details and cancel pending holds; they cannot create/pay/fulfil/contact through an order. Their restricted frontend includes those read/cancel routes. Order-related enquiries reuse the unique buyer/listing conversation and enforce existing blocking/suspension rules. Order notifications are recipient-scoped and link to the order receipt.
+
+Validation includes competing buyers, idempotent retries/key conflicts, tampered totals, unverified/self-order attempts, seller edit locks, private access, expiry/late payment, simulator refusal in production, failure release, role/version checks, collection completion and participant contact. Frontend tests cover quote submission/retry stability, disabled checkout, simulated receipts, cancellation, collection and suspended controls. Hosted CI/live provider behavior is not claimed.
+
+## v2.8 — Order disputes and simulated refunds
+
+Order details now include buyer issue/refund requests, an immutable seller response and a seller full simulated refund action. While a case is open, ordinary collection controls are unavailable. The shared case panel displays original reason, response, shared final resolution, test refund amount/reference and clear simulation/return limitations. Suspended participants keep these remedy controls while messaging/commerce remain restricted.
+
+The allowlisted admin navigation includes `/admin/order-disputes`, with open/refunded/declined filters, pagination, shared resolution input and direct `/admin/order-disputes/:id` URLs. Admins can simulate a refund or decline to resume the original order stage; own-order admin resolution controls are hidden and server-enforced. Current revisions are submitted with every decision, amounts never come from the browser, and failed/stale responses leave the last canonical display available for refresh. A successful decision reloads the queue.
+
+All added interface and known error text has en/si/ta dictionary entries. User reason/response/resolution text is rendered as plain text and is not translated. The backend [order guide](https://github.com/BlueZoft/Past_Perfect_BackEnd/blob/master/docs/workflows/orders.md) documents placeholder one-case/one-response/full-total/no-deadline policy and code locations to change it. No real money, physical return verification, partial refunds, attachments or automatic relisting are implemented. Production cannot run the simulator. Both repositories are version 2.8.0.
+
+Validation adds component tests for buyer request payload/state, seller response/refund, admin decisions and role restrictions, stale response recovery, disabled simulation and suspended remedy access. Existing locale key parity, full regression suites and production build remain release checks.
+
+Verified for v2.8: **77 backend tests**, **58 frontend tests**, and the frontend production build pass.
+
+## v2.9 — Keyword discovery and saved searches
+
+Browse now supports title/description keyword search with relevance ordering, explicit title-only substring mode, condition and clothing-size filters. Search mode and filter changes use the browse URL and reset pagination. Existing title URLs preserve their old behavior. Switching away from clothing clears size; keyword and title modes cannot accidentally submit both terms. The interface explains word versus partial-text matching.
+
+Signed-in active users can name/save the current successful filters, then run, rename or delete them through `/saved-searches`. Stored preferences omit pagination and reopen current public results through an allowlisted internal URL. Rename/delete sends the current saved-search revision. Failed/stale requests retain the displayed record for refresh; an uncertain save can be recovered from Saved searches. There are no matching-listing alerts or availability promises. English/Sinhala/Tamil include all new interface and known error text. User-written search names/terms are not translated.
+
+See the backend [search guide](https://github.com/BlueZoft/Past_Perfect_BackEnd/blob/master/docs/configuration/search.md) for text syntax, index provisioning, private storage, the starter limit of 25 and future provider/alert configuration. Fuzzy search, typed-attribute filters and native-speaker/production scale review remain pending. No new external credentials or real-world data are required. Both repositories are version 2.9.0.
+
+Validation covers URL mode/filter forwarding, saving only supported filters, network retries, canonical reopening, rename/delete revisions, stale-refresh recovery, authentication gating, existing locale parity and an automated DOM accessibility audit for the saved-search controls (visual contrast still needs manual review).
+
+Verified for v2.9: **85 backend tests**, **67 frontend tests**, and the frontend production build pass.
+
+## v3.0 — Local application completion
+
+Adds metadata-generated text/enum/numeric-range attribute filters to browse URLs and saved presets; changing category clears stale filter state. Saved searches can opt into in-app matching alerts on creation or through versioned toggles. Alerts default off, start a fresh eligibility window when enabled and never imply item reservation or availability. Scan progress/retries/deduplication live in the backend; there is no email/push/live scheduler configuration in the frontend. Notification labels link to server-selected matched listings.
+
+Completed test-order buyers can submit one immutable 1–5 rating and review. The seller page displays eligible reviews and a clearly separate test average, never real customer reputation. Active admins can hide/restore reviews with a shared reason/current order revision; own-order moderation is forbidden. `/analytics` shows the signed-in seller's inventory/order status counts and simulated checkout/refund totals, expressly excluding earnings/payout claims. All new UI/known error copy is present in en/si/ta, while user-authored text is never translated.
+
+Both repositories are version 3.0.0. The [local release checklist](local-release.md) closes the implemented scope and links to backend setup/limitations. No live deployment, environment publication, financial/provider/carrier integration or external messaging is performed. Optional hardening/product tracks and human/operational launch checks remain explicitly separate.
+
+Validation adds end-to-end API authorization, late-insert alert retry/deduplication, typed filter bounds, review/version/moderation/private analytics checks, health readiness behavior, UI preference/review/moderation/notification payloads and an axe DOM audit of the analytics tables. Visual/manual/native-speaker review and hosted CI are not claimed.
+
+Release verification: **94 backend tests**, **75 frontend tests**, and the frontend production build pass. No live provider or hosted deployment verification is claimed.
+
+
+## Documentation handbook audit — 18 November 2026
+
+Documentation-only revision against Web `2abc119` / API `aa07731` (application version 3.0.0). Reorganized the current platform introduction, architecture/data/security descriptions, workflows, buyer/seller/admin/demo guides, source/route references and technical configuration/API material under subject directories. README/index navigation and existing filename redirects preserve entry points. Replaced the current API's chronological contract with a consolidated v3.0 reference; the earlier API evolution remains explicitly archived. Corrected superseded account-notification, typed-filter and suspended-account statements in maintained guides.
+
+Validation checks local/companion link targets, browser route coverage, topic navigation, source paths and the documentation-only file scope. The prior 94 API/75 web tests and build results remain recorded v3.0 evidence, not newly claimed application/provider/browser test runs for these prose changes. No runtime behavior, dependencies, deployment or data migration changed.

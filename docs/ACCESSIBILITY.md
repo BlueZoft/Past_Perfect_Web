@@ -1,11 +1,3 @@
-# Accessibility and mobile validation
+# Documentation moved
 
-The application has a keyboard-visible skip link targeting a focusable content container. Route changes focus that container and reset scroll. Page/form landmarks, explicit field labels, native required/range constraints, focus-visible outlines and live status/error messages support keyboard and assistive technology use. File inputs remain native and image removal uses buttons. Touch controls target at least 44px height, forms adapt to narrow viewports, and reduced-motion preferences disable decorative transitions/animation.
-
-`CategoryAttributes` uses server catalogue metadata for labels, input types and bounds, clearing stale values on category changes. Read-only values are rendered as escaped text. Locale changes preserve state and update labels. The upload photo count is announced politely; previews are revoked when removed/unmounted. Server output is resized WebP, avoiding reliance on client compression.
-
-Run `npm test` and `npm run build`. Automated checks cover category-control behavior, plain-text rendering, focus movement and axe-core DOM rules on a representative listing form. Color contrast is excluded in jsdom because it lacks reliable layout/canvas. Passing this check is not a full accessibility audit. Before release, test keyboard-only paths, screen readers in all three languages, 200%/400% zoom, contrast, narrow devices and camera/gallery uploads in actual browsers. No device/visual audit is claimed by this release.
-
-v2.9 saved-search create/rename forms have wrapped labels, bounded required inputs and disabled busy/invalid controls; saved-search result links and deletion/refresh use native links/buttons. Errors use alerts and saves/loading use status text. A representative saved-search management screen passes an axe-core DOM audit with color-contrast disabled under jsdom. Manual keyboard, screen-reader, contrast and real-device review remain pending.
-
-v3.0 adds fieldset/legend and labelled metadata-filter controls, explicit labelled alert checkboxes, required rating/review inputs, native pagination/actions, status/error text and analytics tables with captions and scoped row headers. A representative analytics screen passes the automated DOM audit with visual contrast disabled in jsdom. These checks supplement, rather than certify, real-device/screen-reader/keyboard/contrast testing in the release checklist.
+This page is kept for existing links. Read the maintained [documentation](quality/accessibility.md) and the [documentation index](README.md).
